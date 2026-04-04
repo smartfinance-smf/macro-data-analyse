@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FX MacroDash v3 — Indicateurs Libres</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#080b10; --s1:#0d1117; --s2:#131920; --border:#1c2430; --b2:#253040;
+  --text:#e8edf2; --muted:#3d4f60; --m2:#2a3a4a;
+  --usd:#3d7fd4; --cad:#c8392a; --eur:#4a9e78; --gbp:#9b6dd4;
+  --chf:#e8c55a; --jpy:#e05060; --aud:#4ab8d4; --nzd:#d4893b;
+  --c-inflation:#4d9ed8;
+  --c-emplois:#3cbf82;
+  --c-croissance:#e8c55a;
+  --c-taux:#9b6dd4;
+  --c-autres:#d4943b;
+  --c-pos:#3cdf80; --c-neg:#e05060;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+/* ── HEADER ── */
+header{
+  background:var(--s1);border-bottom:1px solid var(--border);
+  padding:8px 20px;display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:200;flex-wrap:wrap;
+}
+.brand{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;white-space:nowrap;letter-spacing:-.02em;}
+.brand-dot{width:7px;height:7px;border-radius:50%;background:var(--c-pos);box-shadow:0 0 8px var(--c-pos);animation:blink 2s ease infinite;}
+.badge{font-family:'Space Mono',monospace;font-size:8px;font-weight:700;background:rgba(232,197,90,.1);color:var(--c-croissance);border:1px solid rgba(232,197,90,.2);padding:3px 8px;border-radius:3px;letter-spacing:.08em;}
+.badge.v3{background:rgba(77,158,216,.08);color:var(--c-inflation);border-color:rgba(77,158,216,.2);}
+.filter-sep{width:1px;height:18px;background:var(--border);margin:0 2px;flex-shrink:0;}
+.filter-group{display:flex;gap:3px;flex-wrap:wrap;align-items:center;}
+.filter-label{font-size:7px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px;white-space:nowrap;}
+.fbtn{padding:4px 11px;border-radius:20px;font-size:9px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap;letter-spacing:.03em;}
+.fbtn:hover{color:var(--text);border-color:var(--b2);}
+.nav-right{margin-left:auto;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);white-space:nowrap;}
+
+/* ── EDIT PANEL ── */
+#edit-panel{background:linear-gradient(135deg,#0d1117,#0a1520);border-bottom:1px solid var(--border);padding:9px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ep-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.edit-btn{padding:6px 16px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--b2);background:var(--s2);color:var(--text);font-family:'DM Sans',sans-serif;transition:all .15s;}
+.edit-btn:hover{background:var(--b2);}
+.edit-btn.primary{background:var(--c-inflation);border-color:var(--c-inflation);color:#fff;}
+.edit-btn.primary:hover{background:#3a8ec8;border-color:#3a8ec8;}
+.ep-status{font-size:9px;color:var(--muted);}
+#last-update{color:var(--c-emplois);font-weight:600;}
+.ind-count{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+#count-badge{color:var(--c-inflation);font-weight:700;}
+
+/* ── MODAL ── */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
+#modal-overlay.open{display:flex;}
+#modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:min(700px,96vw);max-height:92vh;overflow-y:auto;padding:0;animation:slideUp .22s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.modal-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:var(--s1);z-index:10;}
+.modal-head-info h2{font-size:13px;font-weight:700;letter-spacing:-.01em;}
+.modal-head-info p{font-size:9px;color:var(--muted);margin-top:2px;}
+.close-btn{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:5px 11px;font-size:10px;font-family:'DM Sans',sans-serif;transition:all .15s;flex-shrink:0;}
+.close-btn:hover{border-color:var(--c-neg);color:var(--c-neg);}
+.modal-body{padding:14px 22px 22px;}
+
+/* Modal tabs */
+.m-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--border);}
+.m-tab{padding:8px 18px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.02em;}
+.m-tab:hover{color:var(--text);}
+.m-tab.active{color:var(--c-inflation);border-bottom-color:var(--c-inflation);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* Form */
+.form-section{margin-bottom:18px;}
+.form-section-title{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.fields-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:9px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field.full{grid-column:1/-1;}
+.field label{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.field input,.field select{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:var(--c-inflation);}
+.field select option{background:var(--s1);}
+.field input::placeholder{color:var(--muted);opacity:.6;}
+
+/* Data table */
+.data-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.data-info-note{font-size:9px;color:var(--muted);padding:7px 12px;background:rgba(77,158,216,.05);border:1px solid rgba(77,158,216,.12);border-radius:6px;margin-bottom:12px;line-height:1.5;}
+.data-info-note strong{color:var(--c-pos);}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:5px 8px;border-bottom:1px solid var(--border);text-align:left;}
+.data-table th.right{text-align:right;}
+.data-table td{padding:3px 6px;border-bottom:1px solid rgba(28,36,48,.5);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,.015);}
+.data-table input{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-size:11px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;width:100%;transition:border-color .15s;}
+.data-table input:focus{border-color:var(--c-inflation);}
+.row-num{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);text-align:right;padding-right:8px;width:28px;}
+.row-star{color:var(--c-pos);font-size:9px;text-align:center;width:16px;}
+.row-del{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:4px 7px;font-size:10px;border-radius:4px;transition:all .15s;}
+.row-del:hover{color:var(--c-neg);background:rgba(224,80,96,.1);}
+.add-row-btn{margin-top:10px;padding:7px 0;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px dashed var(--b2);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;width:100%;letter-spacing:.02em;}
+.add-row-btn:hover{border-color:var(--c-emplois);color:var(--c-emplois);background:rgba(60,191,130,.04);}
+.empty-data{text-align:center;padding:28px;color:var(--muted);font-size:11px;}
+.source-bar{display:flex;align-items:center;gap:8px;margin-top:8px;padding:9px 13px;background:rgba(77,158,216,.07);border:1px solid rgba(77,158,216,.2);border-radius:8px;flex-wrap:wrap;}
+.source-bar-label{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.source-link-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(77,158,216,.3);background:rgba(77,158,216,.08);color:var(--c-inflation);font-family:'DM Sans',sans-serif;transition:all .15s;text-decoration:none;white-space:nowrap;}
+.source-link-btn:hover{background:rgba(77,158,216,.18);border-color:var(--c-inflation);}
+.source-no-link{font-size:10px;color:var(--muted);font-style:italic;}
+.next-label-hint{font-size:8px;color:var(--c-emplois);padding:3px 6px;letter-spacing:.02em;}
+.fbtn.on{color:#fff;border-color:transparent;}
+
+/* Action row */
+.action-row{display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;padding:12px 16px 60px;}
+
+/* ── SECTION ── */
+.sec{grid-column:1/-1;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);padding:8px 2px 2px;display:flex;align-items:center;gap:10px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-flag{font-size:14px;}
+.sec-count{font-size:8px;color:var(--muted);font-family:'Space Mono',monospace;opacity:.6;}
+
+/* ── CARD ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s;animation:fadeIn .3s ease both;}
+.card:hover{border-color:var(--b2);box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.card.hidden{display:none!important;}
+.card-head{padding:10px 13px 0;display:flex;align-items:center;gap:7px;}
+.card-flag{font-size:13px;flex-shrink:0;}
+.card-title{font-size:11px;font-weight:700;flex:1;letter-spacing:-.01em;line-height:1.2;}
+.cat-tag{font-size:7px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+.vals-row{display:flex;gap:12px;padding:7px 13px 4px;flex-wrap:wrap;align-items:flex-end;min-height:34px;}
+.vi{display:flex;flex-direction:column;}
+.vn{font-size:20px;font-weight:700;line-height:1;letter-spacing:-.03em;font-family:'Space Mono',monospace;}
+.vl{font-size:7px;color:var(--muted);margin-top:2px;letter-spacing:.03em;}
+.vdelta{font-size:10px;font-weight:700;font-family:'Space Mono',monospace;line-height:1;}
+/* ── CARD HEADER : tout sur 1 ligne, stats taille tag ── */
+.card-head{
+  padding:7px 12px;
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--border);
+  flex-wrap:nowrap;overflow:hidden;
+}
+.card-flag{font-size:12px;flex-shrink:0;}
+.card-title{font-size:11px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;flex-shrink:0;}
+.head-sep{width:1px;height:14px;background:var(--border);flex-shrink:0;margin:0 1px;}
+.head-stats{display:flex;align-items:center;gap:5px;flex:1;min-width:0;overflow:hidden;}
+.stat-main{display:flex;flex-direction:column;gap:0;flex-shrink:0;}
+.stat-main .vn{font-size:8px;font-weight:700;line-height:1.3;letter-spacing:.01em;font-family:'Space Mono',monospace;}
+.stat-main .vl{font-size:6px;color:var(--muted);letter-spacing:.02em;white-space:nowrap;}
+.stat-row{display:flex;flex-direction:column;gap:0;flex-shrink:0;}
+.stat-row .vdelta{font-size:8px;font-weight:700;font-family:'Space Mono',monospace;line-height:1.3;}
+.stat-row .vl{font-size:6px;color:var(--muted);letter-spacing:.02em;}
+.cat-tag{font-size:7px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-left:auto;}
+/* ── CHART : pleine largeur ── */
+.card-chart-area{padding:4px 6px 6px;height:140px;}
+.card-chart-area > div{width:100%;height:100%;}
+.card-foot-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.card-foot-src{color:var(--muted);opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-actions{display:flex;gap:2px;flex-shrink:0;margin-left:4px;}
+.cbtn{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:8px;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;}
+.cbtn:hover{border-color:var(--c-inflation);color:var(--c-inflation);}
+.cbtn.data-btn:hover{border-color:var(--c-emplois);color:var(--c-emplois);}
+.cbtn.del-btn:hover{border-color:var(--c-neg);color:var(--c-neg);}
+.no-data-card{grid-column:1/-1;text-align:center;padding:16px;color:var(--muted);font-size:10px;background:var(--s1);border:1px dashed var(--border);border-radius:10px;}
+
+/* Empty state */
+.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;animation:fadeIn .4s ease;}
+.empty-state-icon{font-size:40px;margin-bottom:16px;opacity:.5;}
+.empty-state h3{font-size:16px;font-weight:700;margin-bottom:8px;letter-spacing:-.01em;}
+.empty-state p{font-size:12px;color:var(--muted);margin-bottom:24px;}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr;padding:8px 8px 40px;}
+  header{padding:6px 12px;gap:5px;}
+  .filter-sep{display:none;}
+  .nav-right{display:none;}
+}
+
+/* ── MULTI-FILTRE ── */
+.fbtn.active{color:#fff!important;border-color:transparent!important;}
+.fbtn.active[data-v="usd"]{background:var(--usd);}
+.fbtn.active[data-v="cad"]{background:var(--cad);}
+.fbtn.active[data-v="eur"]{background:var(--eur);}
+.fbtn.active[data-v="gbp"]{background:var(--gbp);}
+.fbtn.active[data-v="chf"]{background:var(--chf);color:#000!important;}
+.fbtn.active[data-v="jpy"]{background:var(--jpy);}
+.fbtn.active[data-v="aud"]{background:var(--aud);}
+.fbtn.active[data-v="nzd"]{background:var(--nzd);}
+.fbtn.active[data-v="inflation"]{background:var(--c-inflation);}
+.fbtn.active[data-v="emplois"]{background:var(--c-emplois);}
+.fbtn.active[data-v="croissance"]{background:var(--c-croissance);color:#000!important;}
+.fbtn.active[data-v="taux"]{background:var(--c-taux);}
+.fbtn.active[data-v="autres"]{background:var(--c-autres);}
+/* ── Bouton ＋ header ── */
+.add-ind-btn{
+  width:26px;height:26px;border-radius:6px;
+  font-size:16px;line-height:1;font-weight:400;
+  cursor:pointer;border:1px solid rgba(77,158,216,.4);
+  background:rgba(77,158,216,.12);color:var(--c-inflation);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .15s;padding:0;
+}
+.add-ind-btn:hover{background:rgba(77,158,216,.28);border-color:var(--c-inflation);}
+
+/* ── Barre de statut bas de page ── */
+#status-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--s1);border-top:1px solid var(--border);
+  padding:5px 20px;font-family:'Space Mono',monospace;
+  font-size:8px;color:var(--muted);z-index:100;
+  display:flex;align-items:center;gap:4px;
+}
+.fbtn-all.active{background:#1e2d3d!important;color:var(--text)!important;border-color:transparent!important;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="brand-dot"></span>FX MacroDash</div>
+  <button class="add-ind-btn" onclick="openAddModal()" title="Ajouter un indicateur">＋</button>
+
+  <div class="filter-sep"></div>
+  <span class="filter-label">Devise</span>
+  <div class="filter-group" id="filter-currencies">
+    <button class="fbtn fbtn-all active" data-f="country" data-v="all" onclick="filtToggle(this)">Tous</button>
+    <button class="fbtn" data-f="country" data-v="usd" onclick="filtToggle(this)">🇺🇸 USD</button>
+    <button class="fbtn" data-f="country" data-v="cad" onclick="filtToggle(this)">🇨🇦 CAD</button>
+    <button class="fbtn" data-f="country" data-v="eur" onclick="filtToggle(this)">🇪🇺 EUR</button>
+    <button class="fbtn" data-f="country" data-v="gbp" onclick="filtToggle(this)">🇬🇧 GBP</button>
+    <button class="fbtn" data-f="country" data-v="chf" onclick="filtToggle(this)">🇨🇭 CHF</button>
+    <button class="fbtn" data-f="country" data-v="jpy" onclick="filtToggle(this)">🇯🇵 JPY</button>
+    <button class="fbtn" data-f="country" data-v="aud" onclick="filtToggle(this)">🇦🇺 AUD</button>
+    <button class="fbtn" data-f="country" data-v="nzd" onclick="filtToggle(this)">🇳🇿 NZD</button>
+  </div>
+
+  <div class="filter-sep"></div>
+  <span class="filter-label">Catégorie</span>
+  <div class="filter-group" id="filter-cats">
+    <button class="fbtn fbtn-all active" data-f="cat" data-v="all-cat" onclick="filtCatToggle(this)">Toutes</button>
+    <button class="fbtn" data-f="cat" data-v="inflation" onclick="filtCatToggle(this)">📈 Inflation</button>
+    <button class="fbtn" data-f="cat" data-v="emplois"    onclick="filtCatToggle(this)">💼 Emplois</button>
+    <button class="fbtn" data-f="cat" data-v="croissance" onclick="filtCatToggle(this)">🌱 Croissance</button>
+    <button class="fbtn" data-f="cat" data-v="taux"       onclick="filtCatToggle(this)">🏦 Taux</button>
+    <button class="fbtn" data-f="cat" data-v="autres"     onclick="filtCatToggle(this)">📊 Autres</button>
+  </div>
+
+  <div class="nav-right" id="nav-right">—</div>
+</header>
+
+<!-- ── MODAL ── -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div id="modal">
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <h2 id="modal-title">Nouvel indicateur</h2>
+        <p id="modal-sub">Paramètres puis saisie des données</p>
+      </div>
+      <button class="close-btn" onclick="closeModal()">✕ Fermer</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-tabs">
+        <button class="m-tab active" data-tab="params" onclick="switchTab('params')">⚙️ Paramètres</button>
+        <button class="m-tab" data-tab="data" onclick="switchTab('data')">📊 Données</button>
+      </div>
+
+      <!-- PARAMS -->
+      <div class="tab-pane active" id="pane-params">
+        <div class="form-section">
+          <div class="form-section-title">Identification</div>
+          <div class="fields-grid">
+            <div class="field full">
+              <label>Nom de l'indicateur *</label>
+              <input type="text" id="inp-name" placeholder="ex: CPI YoY, NFP, PMI Mfg, PIB QoQ…">
+            </div>
+            <div class="field">
+              <label>Devise *</label>
+              <select id="inp-currency">
+                <option value="USD">🇺🇸 USD — Dollar US</option>
+                <option value="CAD">🇨🇦 CAD — Dollar CA</option>
+                <option value="EUR">🇪🇺 EUR — Euro</option>
+                <option value="GBP">🇬🇧 GBP — Livre Sterling</option>
+                <option value="CHF">🇨🇭 CHF — Franc Suisse</option>
+                <option value="JPY">🇯🇵 JPY — Yen</option>
+                <option value="AUD">🇦🇺 AUD — Dollar AUS</option>
+                <option value="NZD">🇳🇿 NZD — Dollar NZ</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Catégorie *</label>
+              <select id="inp-category">
+                <option value="inflation">📈 Inflation</option>
+                <option value="emplois">💼 Emplois</option>
+                <option value="croissance">🌱 Croissance</option>
+                <option value="taux">🏦 Taux d'intérêt</option>
+                <option value="autres">📊 Autres</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Fréquence de publication</label>
+              <select id="inp-frequency">
+                <option value="monthly">Mensuelle</option>
+                <option value="quarterly">Trimestrielle</option>
+                <option value="weekly">Hebdomadaire</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Unité d'affichage</label>
+              <input type="text" id="inp-unit" placeholder="ex: % · K · index · pts">
+            </div>
+            <div class="field">
+              <label>Niveau de référence (optionnel)</label>
+              <input type="number" step="0.1" id="inp-reflevel" placeholder="ex: 2 → CPI  50 → PMI">
+            </div>
+            <div class="field">
+              <label>Type de graphique</label>
+              <select id="inp-charttype">
+                <option value="line">Ligne</option>
+                <option value="bar">Barres</option>
+                <option value="stepped">Escalier (taux)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Source — Nom court</label>
+              <input type="text" id="inp-source" placeholder="ex: BLS · Eurostat · ONS…">
+            </div>
+            <div class="field full">
+              <label>Source — URL directe <span style="font-weight:400;text-transform:none;letter-spacing:0">(collez le lien ici)</span></label>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <input type="url" id="inp-source-url" placeholder="https://www.bls.gov/cpi/ …" style="flex:1">
+                <button type="button" onclick="testSourceUrl()" style="flex-shrink:0;padding:7px 12px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--s2);color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;">🔗 Tester</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="edit-btn primary" onclick="saveParams()">✓ Enregistrer → Données</button>
+          <button class="close-btn" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+
+      <!-- DATA -->
+      <div class="tab-pane" id="pane-data">
+        <div class="data-info-note">
+          Saisissez chaque entrée au format <strong>Réel [tab] Attente</strong> — le format s'adapte automatiquement à l'unité de l'indicateur : <strong>4.4%&nbsp;&nbsp;4.3%</strong> pour les %, <strong>200K&nbsp;&nbsp;125K</strong> pour les emplois, <strong>52.3&nbsp;&nbsp;51.0</strong> pour les indices. L'attente est optionnelle. Les <strong>12 dernières entrées</strong> sont affichées sur le dashboard.
+        </div>
+
+        <!-- Zone de saisie rapide -->
+        <div id="quick-paste-zone" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">⚡ Saisie rapide — coller plusieurs lignes</span>
+            <button onclick="toggleQuickZone()" id="quick-toggle-btn" style="padding:3px 10px;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;">▼ Ouvrir</button>
+          </div>
+          <div id="quick-paste-inner" style="display:none;">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:5px;line-height:1.6;">
+              Format : <code style="background:var(--bg);padding:1px 5px;border-radius:3px;color:var(--c-inflation);">Période&nbsp;&nbsp;Réel&nbsp;&nbsp;Attente</code> — une ligne par période, l'attente est optionnelle.<br>
+              Exemple :<br>
+              <code style="background:var(--bg);padding:2px 8px;border-radius:3px;color:var(--c-emplois);display:inline-block;margin-top:3px;line-height:1.8">Jan 25&nbsp;&nbsp;4.4%&nbsp;&nbsp;4.3%<br>Fév 25&nbsp;&nbsp;2.8%&nbsp;&nbsp;2.9%<br>Mar 25&nbsp;&nbsp;3.1%</code>
+            </div>
+            <textarea id="quick-paste-input" placeholder="Jan 25  4.4%  4.3%&#10;Fév 25  2.8%  2.9%&#10;Mar 25  3.1%" style="width:100%;height:110px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-size:11px;color:var(--text);font-family:'Space Mono',monospace;resize:vertical;outline:none;line-height:1.6;transition:border-color .15s;" onfocus="this.style.borderColor='var(--c-inflation)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+            <div style="display:flex;gap:6px;margin-top:6px;">
+              <button onclick="applyQuickPaste(false)" style="padding:6px 14px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--c-emplois);background:rgba(60,191,130,.08);color:var(--c-emplois);font-family:'DM Sans',sans-serif;transition:all .15s;">＋ Ajouter aux données existantes</button>
+              <button onclick="applyQuickPaste(true)" style="padding:6px 14px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--c-neg);background:rgba(224,80,96,.08);color:var(--c-neg);font-family:'DM Sans',sans-serif;transition:all .15s;">⚠ Remplacer toutes les données</button>
+              <span id="quick-paste-status" style="font-size:9px;color:var(--c-pos);align-self:center;display:none;"></span>
+            </div>
+          </div>
+        </div>
+        <table class="data-table" id="data-table">
+          <thead>
+            <tr>
+              <th class="right" style="width:28px">#</th>
+              <th style="width:32%">Période</th>
+              <th style="width:44%">
+                Réel &nbsp;<span style="color:var(--muted);font-weight:400">·</span>&nbsp; Attente
+                <span style="font-weight:400;font-size:7px;color:var(--muted);letter-spacing:0;text-transform:none;margin-left:4px">ex: 4.4%&nbsp;&nbsp;4.3%</span>
+              </th>
+              <th style="width:16px">★</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="data-rows"></tbody>
+        </table>
+        <button class="add-row-btn" onclick="addDataRow()">＋ Ajouter une période</button>
+        <div id="next-label-hint" class="next-label-hint" style="display:none;"></div>
+        <div id="source-bar" class="source-bar" style="display:none;">
+          <span class="source-bar-label">🔗 Source</span>
+          <span id="source-link-content"></span>
+        </div>
+        <div class="action-row">
+          <button class="edit-btn primary" onclick="saveData()">✓ Sauvegarder et fermer</button>
+          <button class="close-btn" onclick="closeModal()">Fermer</button>
+        </div>
+      </div><!-- /pane-data -->
+
+    </div><!-- /modal-body -->
+  </div><!-- /modal -->
+</div><!-- /modal-overlay -->
+
+<!-- ── GRID ── -->
+<div class="grid" id="grid"></div>
+
+<!-- ── STATUS BAR (bas de page) ── -->
+<div id="status-bar">
+  <span id="count-badge-bar">0</span> indicateur(s)
+  <span style="margin:0 8px;opacity:.3">·</span>
+  Dernière modif. : <span id="last-update" style="color:var(--c-emplois);font-weight:600">—</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  CONSTANTES
+// ══════════════════════════════════════════════════════════════════
+const CURRENCIES = [
+  {code:'USD',flag:'🇺🇸',name:'États-Unis'},
+  {code:'CAD',flag:'🇨🇦',name:'Canada'},
+  {code:'EUR',flag:'🇪🇺',name:'Zone Euro'},
+  {code:'GBP',flag:'🇬🇧',name:'Royaume-Uni'},
+  {code:'CHF',flag:'🇨🇭',name:'Suisse'},
+  {code:'JPY',flag:'🇯🇵',name:'Japon'},
+  {code:'AUD',flag:'🇦🇺',name:'Australie'},
+  {code:'NZD',flag:'🇳🇿',name:'N. Zélande'},
+];
+
+const CATS = {
+  inflation: {label:'Inflation',  emoji:'📈',color:'var(--c-inflation)',bg:'rgba(77,158,216,.12)', border:'rgba(77,158,216,.22)', hex:'#4d9ed8'},
+  emplois:   {label:'Emplois',    emoji:'💼',color:'var(--c-emplois)',  bg:'rgba(60,191,130,.12)', border:'rgba(60,191,130,.22)', hex:'#3cbf82'},
+  croissance:{label:'Croissance', emoji:'🌱',color:'var(--c-croissance)',bg:'rgba(232,197,90,.12)',border:'rgba(232,197,90,.22)', hex:'#e8c55a'},
+  taux:      {label:'Taux',       emoji:'🏦',color:'var(--c-taux)',     bg:'rgba(155,109,212,.12)',border:'rgba(155,109,212,.22)',hex:'#9b6dd4'},
+  autres:    {label:'Autres',     emoji:'📊',color:'var(--c-autres)',   bg:'rgba(212,148,59,.12)', border:'rgba(212,148,59,.22)', hex:'#d4943b'},
+};
+
+const FREQ = {monthly:'Mensuel',quarterly:'Trimestriel',weekly:'Hebdomadaire'};
+
+// ── Données par défaut (quelques exemples pour démarrer) ──
+const DEFAULT_DATA = {
+  indicators: [
+    {
+      id:'ex_usd_cpi', currency:'USD', name:'CPI YoY', category:'inflation',
+      frequency:'monthly', unit:'%', refLevel:2.0, chartType:'line', source:'BLS',
+      data:[
+        {label:'Avr 24',value:3.5},{label:'Mai 24',value:3.4},{label:'Jui 24',value:3.0},
+        {label:'Jul 24',value:2.9},{label:'Aoû 24',value:2.5},{label:'Sep 24',value:2.4},
+        {label:'Oct 24',value:2.6},{label:'Nov 24',value:2.7},{label:'Déc 24',value:2.9},
+        {label:'Jan 25',value:3.0},{label:'Fév 25',value:2.8},{label:'Mar 25',value:2.4},
+      ]
+    },
+    {
+      id:'ex_usd_nfp', currency:'USD', name:'NFP', category:'emplois',
+      frequency:'monthly', unit:'K', refLevel:null, chartType:'bar', source:'BLS',
+      data:[
+        {label:'Avr 24',value:165},{label:'Mai 24',value:218},{label:'Jui 24',value:179},
+        {label:'Jul 24',value:144},{label:'Aoû 24',value:78}, {label:'Sep 24',value:223},
+        {label:'Oct 24',value:223},{label:'Nov 24',value:212},{label:'Déc 24',value:307},
+        {label:'Jan 25',value:111},{label:'Fév 25',value:117},{label:'Mar 25',value:228},
+      ]
+    },
+    {
+      id:'ex_usd_rate', currency:'USD', name:'Taux Fed', category:'taux',
+      frequency:'monthly', unit:'%', refLevel:null, chartType:'stepped', source:'Fed',
+      data:[
+        {label:'Avr 24',value:5.25},{label:'Mai 24',value:5.25},{label:'Jui 24',value:5.25},
+        {label:'Jul 24',value:5.25},{label:'Aoû 24',value:5.25},{label:'Sep 24',value:5.00},
+        {label:'Oct 24',value:4.75},{label:'Nov 24',value:4.75},{label:'Déc 24',value:4.50},
+        {label:'Jan 25',value:4.25},{label:'Fév 25',value:4.25},{label:'Mar 25',value:4.25},
+      ]
+    },
+    {
+      id:'ex_eur_cpi', currency:'EUR', name:'CPI YoY', category:'inflation',
+      frequency:'monthly', unit:'%', refLevel:2.0, chartType:'line', source:'Eurostat',
+      data:[
+        {label:'Avr 24',value:2.4},{label:'Mai 24',value:2.6},{label:'Jui 24',value:2.5},
+        {label:'Jul 24',value:2.6},{label:'Aoû 24',value:2.2},{label:'Sep 24',value:1.7},
+        {label:'Oct 24',value:2.3},{label:'Nov 24',value:2.3},{label:'Déc 24',value:2.4},
+        {label:'Jan 25',value:2.5},{label:'Fév 25',value:2.3},{label:'Mar 25',value:2.2},
+      ]
+    },
+    {
+      id:'ex_eur_rate', currency:'EUR', name:'Taux BCE', category:'taux',
+      frequency:'monthly', unit:'%', refLevel:null, chartType:'stepped', source:'BCE',
+      data:[
+        {label:'Avr 24',value:4.00},{label:'Mai 24',value:4.00},{label:'Jui 24',value:4.00},
+        {label:'Jul 24',value:3.75},{label:'Aoû 24',value:3.50},{label:'Sep 24',value:3.50},
+        {label:'Oct 24',value:3.25},{label:'Nov 24',value:3.00},{label:'Déc 24',value:3.00},
+        {label:'Jan 25',value:2.75},{label:'Fév 25',value:2.65},{label:'Mar 25',value:2.40},
+      ]
+    },
+  ]
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════
+let DATA = JSON.parse(localStorage.getItem('fxmd_v3') || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
+let activeCurrencies = new Set(['all']);
+let activeCategories = new Set(['all-cat']);
+let currentId = null;
+const charts = {};
+
+// ══════════════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════════════
+function uid() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function fmtVal(v, unit) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  const n = parseFloat(v);
+  if (unit === '%') return n.toFixed(2) + '%';
+  if (unit === 'K') return (n >= 0 ? '+' : '') + Math.round(n) + 'K';
+  if (unit === 'index' || unit === 'pts') return n.toFixed(1);
+  const decimals = Math.abs(n) >= 100 ? 1 : 2;
+  return n.toFixed(decimals) + (unit ? ' ' + unit : '');
+}
+
+function fmtNum(v) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return parseFloat(v).toFixed(2);
+}
+
+function getCurFlag(code) { return CURRENCIES.find(c => c.code === code)?.flag || ''; }
+function getCat(cat) { return CATS[cat] || CATS.autres; }
+
+function persist() {
+  localStorage.setItem('fxmd_v3', JSON.stringify(DATA));
+  const now = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  localStorage.setItem('fxmd_v3_upd', now);
+  document.getElementById('last-update').textContent = now;
+}
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  Object.keys(charts).forEach(k => delete charts[k]);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  BUILD GRID
+// ══════════════════════════════════════════════════════════════════
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  destroyCharts();
+  grid.innerHTML = '';
+
+  document.getElementById('count-badge-bar').textContent = DATA.indicators.length;
+
+  if (DATA.indicators.length === 0) {
+    const em = document.createElement('div');
+    em.className = 'empty-state';
+    em.innerHTML = `
+      <div class="empty-state-icon">📊</div>
+      <h3>Aucun indicateur configuré</h3>
+      <p>Ajoutez votre premier indicateur pour commencer à suivre les données macro.</p>
+      <button class="edit-btn primary" onclick="openAddModal()" style="font-size:12px;padding:10px 24px;">＋ Ajouter un indicateur</button>
+    `;
+    grid.appendChild(em);
+    return;
+  }
+
+  // Groupe par devise (ordre CURRENCIES)
+  const byCur = {};
+  CURRENCIES.forEach(c => byCur[c.code] = []);
+  DATA.indicators.forEach(ind => {
+    if (byCur[ind.currency]) byCur[ind.currency].push(ind);
+  });
+
+  let total = 0;
+  CURRENCIES.forEach(cur => {
+    const inds = byCur[cur.code];
+    if (!inds.length) return;
+
+    const sec = document.createElement('div');
+    sec.className = 'sec';
+    sec.dataset.sec = cur.code.toLowerCase();
+    sec.innerHTML = `<span class="sec-flag">${cur.flag}</span>${cur.code} · ${cur.name}<span class="sec-count">${inds.length} ind.</span>`;
+    grid.appendChild(sec);
+
+    inds.forEach(ind => {
+      grid.appendChild(buildCard(ind));
+      total++;
+    });
+  });
+
+  setTimeout(() => {
+    DATA.indicators.forEach(ind => renderChart(ind));
+    applyFilters();
+  }, 50);
+}
+
+// ── Build card HTML ──
+function buildCard(ind) {
+  const cat = getCat(ind.category);
+  const last12 = ind.data.slice(-12);
+  const latest = last12[last12.length - 1];
+  const prev   = last12[last12.length - 2];
+  const unit   = ind.unit || '';
+  const latestV = latest?.value;
+  const prevV   = prev?.value;
+  const delta   = (latestV !== undefined && prevV !== undefined) ? latestV - prevV : null;
+  const latestExpected = latest?.expected;
+  const surprise = (latestV !== undefined && latestExpected !== undefined && latestExpected !== null) ? latestV - latestExpected : null;
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.country = ind.currency.toLowerCase();
+  card.dataset.cat = ind.category;
+  card.dataset.id = ind.id;
+
+  const latestHtml = latestV !== undefined
+    ? `<span class="vn" style="color:${cat.hex}">${fmtVal(latestV, unit)}</span>`
+    : `<span class="vn" style="color:var(--muted)">—</span>`;
+
+  const deltaHtml = delta !== null ? `
+    <div class="vi">
+      <span class="vdelta" style="color:${delta >= 0 ? 'var(--c-pos)' : 'var(--c-neg)'}">${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta).toFixed(2)}${unit}</span>
+      <span class="vl">vs préc.</span>
+    </div>` : '';
+
+  const surpriseHtml = surprise !== null ? `
+    <div class="vi">
+      <span class="vdelta" style="color:${surprise >= 0 ? 'var(--c-pos)' : 'var(--c-neg)'}">${surprise >= 0 ? '▲' : '▼'} ${Math.abs(surprise).toFixed(2)}${unit}</span>
+      <span class="vl" style="color:#6b7f90">vs att.</span>
+    </div>` : '';
+
+  const refHtml = ind.refLevel != null ? `
+    <div class="vi">
+      <span class="vn" style="color:rgba(60,223,128,.35);font-size:14px">${ind.refLevel}${unit}</span>
+      <span class="vl">Réf.</span>
+    </div>` : '';
+
+  const freqColor = {monthly:'var(--c-inflation)',quarterly:'var(--c-croissance)',weekly:'var(--c-emplois)'}[ind.frequency] || 'var(--muted)';
+
+  const deltaSide = delta !== null ? `
+    <div class="head-sep"></div>
+    <div class="stat-row">
+      <span class="vdelta" style="color:${delta >= 0 ? 'var(--c-pos)' : 'var(--c-neg)'}">${delta >= 0 ? '▲' : '▼'} ${fmtVal(Math.abs(delta), unit)}</span>
+      <span class="vl">vs préc.</span>
+    </div>` : '';
+
+  const surpriseSide = surprise !== null ? `
+    <div class="head-sep"></div>
+    <div class="stat-row">
+      <span class="vdelta" style="color:${surprise >= 0 ? 'var(--c-pos)' : 'var(--c-neg)'}">${surprise >= 0 ? '▲' : '▼'} ${fmtVal(Math.abs(surprise), unit)}</span>
+      <span class="vl">vs att.</span>
+    </div>` : '';
+
+  const refSide = ind.refLevel != null ? `
+    <div class="head-sep"></div>
+    <div class="stat-row">
+      <span class="vdelta" style="color:rgba(60,223,128,.5)">${ind.refLevel}${unit}</span>
+      <span class="vl">Réf.</span>
+    </div>` : '';
+
+  const chartOrEmpty = ind.data.length === 0
+    ? `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:9px;border:1px dashed var(--border);border-radius:6px;">Aucune donnée — cliquez sur 📊 Données</div>`
+    : `<div id="chart-${ind.id}" style="width:100%;height:100%;"></div>`;
+
+  card.innerHTML = `
+    <div class="card-head">
+      <span class="card-flag">${getCurFlag(ind.currency)}</span>
+      <span class="card-title">${ind.name}</span>
+      <div class="head-sep"></div>
+      <div class="head-stats">
+        <div class="stat-main">
+          ${latestV !== undefined
+            ? `<span class="vn" style="color:${cat.hex}">${fmtVal(latestV, unit)}</span>`
+            : `<span class="vn" style="color:var(--muted)">—</span>`}
+          <span class="vl">Dernier · ${latest?.label || '—'}</span>
+        </div>
+        ${deltaSide}
+        ${surpriseSide}
+        ${refSide}
+      </div>
+      <span class="cat-tag" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.border}">${cat.emoji} ${cat.label.toUpperCase()}</span>
+      <div class="card-actions">
+        <button class="cbtn data-btn" onclick="openDataModal('${ind.id}')">📊</button>
+        <button class="cbtn" onclick="openEditModal('${ind.id}')">⚙️</button>
+        <button class="cbtn del-btn" onclick="deleteInd('${ind.id}')">✕</button>
+      </div>
+    </div>
+    <div class="card-chart-area">
+      ${chartOrEmpty}
+    </div>
+  `;
+  return card;
+}
+
+// ── Render chart for one indicator ──
+function renderChart(ind) {
+  const wrap = document.getElementById(`chart-${ind.id}`);
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const canvas = document.createElement('canvas');
+  canvas.style.display = 'block';
+  wrap.appendChild(canvas);
+
+  const last12 = ind.data.slice(-12);
+  if (!last12.length) return;
+
+  const labels    = last12.map(d => d.label);
+  const values    = last12.map(d => d.value);
+  const expected  = last12.map(d => d.expected !== undefined ? d.expected : null);
+  const hasExpected = expected.some(v => v !== null);
+  const forecasts = last12.map(d => d.forecast !== undefined && d.forecast !== null ? d.forecast : null);
+  const hasForecast = forecasts.some(v => v !== null);
+  const col = getCat(ind.category).hex;
+  const GREY = '#6b7f90';
+
+  const BASE = {
+    responsive:true, maintainAspectRatio:false, animation:{duration:300},
+    plugins:{
+      legend:{ display: false },
+      tooltip:{
+        backgroundColor:'#0d1117',borderColor:'#1c2430',borderWidth:1,
+        titleColor:'#3d4f60',bodyColor:'#e8edf2',
+        titleFont:{family:'Space Mono',size:8},
+        bodyFont:{family:'Space Mono',size:9,weight:'700'},padding:8,
+        callbacks:{
+          afterBody: function(items) {
+            const idx = items[0].dataIndex;
+            const r = last12[idx];
+            if (r.expected !== undefined && r.expected !== null && r.value !== undefined) {
+              const surprise = r.value - r.expected;
+              const sign = surprise >= 0 ? '+' : '';
+              return ['Surprise: ' + sign + surprise.toFixed(2) + (ind.unit||'')];
+            }
+            return [];
+          }
+        }
+      }
+    },
+    scales:{
+      x:{grid:{color:'rgba(28,36,48,.9)'},border:{display:false},
+         ticks:{color:'#3d4f60',font:{family:'Space Mono',size:6},maxRotation:0,maxTicksLimit:6,padding:2}},
+      y:{grid:{color:'rgba(28,36,48,.9)'},border:{display:false},
+         ticks:{color:'#3d4f60',font:{family:'Space Mono',size:7},padding:4}}
+    }
+  };
+
+  let cfg;
+  if (ind.chartType === 'bar') {
+    const datasets = [{
+      label: 'Réel',
+      data: values,
+      backgroundColor: values.map(v => v >= 0 ? col+'99' : '#e0506099'),
+      borderColor: values.map(v => v >= 0 ? col : '#e05060'),
+      borderWidth:1, borderRadius:3,
+    }];
+    if (hasExpected) {
+      datasets.push({
+        label: 'Attente',
+        type: 'line',
+        data: expected,
+        borderColor: GREY,
+        borderWidth: 1.5,
+        borderDash: [4,3],
+        pointRadius: 2,
+        pointBackgroundColor: GREY,
+        fill: false,
+        tension: 0.3,
+      });
+    }
+    cfg = {type:'bar', data:{labels, datasets}, options:BASE};
+  } else {
+    const ds = [{
+      label: 'Réel',
+      data:values, borderColor:col, backgroundColor:col+'14',
+      borderWidth:1.8, pointRadius:2, pointBackgroundColor:col,
+      pointBorderColor:'#080b10', pointBorderWidth:1.2, pointHoverRadius:4,
+      fill:true, tension:.35,
+      ...(ind.chartType === 'stepped' ? {stepped:'middle', tension:0} : {}),
+    }];
+    if (hasExpected) {
+      ds.push({
+        label: 'Attente',
+        data: expected,
+        borderColor: GREY,
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderDash: [4,3],
+        pointRadius: 2,
+        pointBackgroundColor: GREY,
+        pointBorderColor: '#080b10',
+        fill: false,
+        tension: 0.3,
+        ...(ind.chartType === 'stepped' ? {stepped:'middle', tension:0} : {}),
+      });
+    }
+    if (ind.refLevel != null) {
+      ds.push({
+        label: '',
+        data:labels.map(() => ind.refLevel),
+        borderColor:'rgba(60,223,128,.3)', borderWidth:1.5,
+        borderDash:[5,4], pointRadius:0, fill:false, tension:0,
+      });
+    }
+    // Courbe attente (grise)
+    if (hasForecast) {
+      ds.push({
+        data: forecasts,
+        borderColor: '#6b7f94',
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderDash: [4, 3],
+        pointRadius: forecasts.map(v => v !== null ? 2 : 0),
+        pointBackgroundColor: '#6b7f94',
+        pointBorderColor: '#080b10',
+        pointBorderWidth: 1,
+        fill: false,
+        tension: .35,
+        spanGaps: true,
+        ...(ind.chartType === 'stepped' ? {stepped:'middle', tension:0} : {}),
+      });
+    }
+    cfg = {type:'line', data:{labels, datasets:ds}, options:BASE};
+  }
+  charts[ind.id] = new Chart(canvas, cfg);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  FILTRES MULTI-SÉLECTION
+// ══════════════════════════════════════════════════════════════════
+function filtToggle(btn) {
+  const v = btn.dataset.v;
+  if (v === 'all') {
+    activeCurrencies = new Set(['all']);
+  } else {
+    activeCurrencies.delete('all');
+    if (activeCurrencies.has(v)) {
+      activeCurrencies.delete(v);
+      if (activeCurrencies.size === 0) activeCurrencies = new Set(['all']);
+    } else {
+      activeCurrencies.add(v);
+    }
+  }
+  document.querySelectorAll('[data-f="country"]').forEach(b => {
+    const isAll = b.dataset.v === 'all';
+    b.classList.toggle('active', activeCurrencies.has(b.dataset.v));
+    if (isAll) b.classList.toggle('fbtn-all', true);
+  });
+  applyFilters();
+}
+
+function filtCatToggle(btn) {
+  const v = btn.dataset.v;
+  if (v === 'all-cat') {
+    activeCategories = new Set(['all-cat']);
+  } else {
+    activeCategories.delete('all-cat');
+    if (activeCategories.has(v)) {
+      activeCategories.delete(v);
+      if (activeCategories.size === 0) activeCategories = new Set(['all-cat']);
+    } else {
+      activeCategories.add(v);
+    }
+  }
+  document.querySelectorAll('[data-f="cat"]').forEach(b => {
+    b.classList.toggle('active', activeCategories.has(b.dataset.v));
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  const cards = document.querySelectorAll('.card');
+  const visib = {};
+  CURRENCIES.forEach(c => visib[c.code.toLowerCase()] = false);
+  const allCur = activeCurrencies.has('all');
+  const allCat = activeCategories.has('all-cat');
+  cards.forEach(card => {
+    const okC = allCur || activeCurrencies.has(card.dataset.country);
+    const okK = allCat || activeCategories.has(card.dataset.cat);
+    const ok  = okC && okK;
+    card.classList.toggle('hidden', !ok);
+    if (ok) visib[card.dataset.country] = true;
+  });
+  document.querySelectorAll('.sec').forEach(s => {
+    if (s.dataset.sec) s.style.display = visib[s.dataset.sec] ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  MODAL — état
+// ══════════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.m-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `pane-${tab}`));
+  if (tab === 'data') {
+    renderDataRows();
+  } else {
+    // Cacher source-bar sur l'onglet params
+    const bar = document.getElementById('source-bar');
+    if (bar) bar.style.display = 'none';
+  }
+}
+
+function _fillForm(ind) {
+  document.getElementById('inp-name').value      = ind.name;
+  document.getElementById('inp-currency').value  = ind.currency;
+  document.getElementById('inp-category').value  = ind.category;
+  document.getElementById('inp-frequency').value = ind.frequency;
+  document.getElementById('inp-unit').value      = ind.unit || '';
+  document.getElementById('inp-reflevel').value  = ind.refLevel ?? '';
+  document.getElementById('inp-charttype').value = ind.chartType || 'line';
+  document.getElementById('inp-source').value    = ind.source || '';
+  document.getElementById('inp-source-url').value = ind.sourceUrl || '';
+}
+
+function _clearForm() {
+  document.getElementById('inp-name').value      = '';
+  document.getElementById('inp-currency').value  = 'USD';
+  document.getElementById('inp-category').value  = 'inflation';
+  document.getElementById('inp-frequency').value = 'monthly';
+  document.getElementById('inp-unit').value      = '%';
+  document.getElementById('inp-reflevel').value  = '';
+  document.getElementById('inp-charttype').value = 'line';
+  document.getElementById('inp-source').value    = '';
+  document.getElementById('inp-source-url').value = '';
+}
+
+function showModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  // Init filtres
+document.querySelectorAll('[data-f="country"][data-v="all"]').forEach(b=>b.classList.add('active','fbtn-all'));
+document.querySelectorAll('[data-f="cat"][data-v="all-cat"]').forEach(b=>b.classList.add('active','fbtn-all'));
+buildGrid();
+}
+
+// ── Ouvrir : nouvel indicateur ──
+function openAddModal() {
+  currentId = null;
+  _clearForm();
+  document.getElementById('modal-title').textContent = 'Nouvel indicateur';
+  document.getElementById('modal-sub').textContent = 'Configurez l\'indicateur puis saisissez les données';
+  switchTab('params');
+  showModal();
+}
+
+// ── Ouvrir : éditer paramètres ──
+function openEditModal(id) {
+  currentId = id;
+  const ind = DATA.indicators.find(i => i.id === id);
+  if (!ind) return;
+  _fillForm(ind);
+  document.getElementById('modal-title').textContent = '⚙️ ' + ind.name;
+  document.getElementById('modal-sub').textContent = ind.currency + ' · ' + (CATS[ind.category]?.label || '');
+  switchTab('params');
+  showModal();
+}
+
+// ── Ouvrir : saisir données ──
+function openDataModal(id) {
+  currentId = id;
+  const ind = DATA.indicators.find(i => i.id === id);
+  if (!ind) return;
+  _fillForm(ind);
+  document.getElementById('modal-title').textContent = '📊 ' + ind.name;
+  document.getElementById('modal-sub').textContent = ind.currency + ' · ' + (FREQ[ind.frequency] || '');
+  switchTab('data');
+  showModal();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SAUVEGARDER PARAMÈTRES
+// ══════════════════════════════════════════════════════════════════
+function saveParams() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) { alert('Le nom de l\'indicateur est requis.'); return; }
+
+  const currency  = document.getElementById('inp-currency').value;
+  const category  = document.getElementById('inp-category').value;
+  const frequency = document.getElementById('inp-frequency').value;
+  const unit      = document.getElementById('inp-unit').value.trim();
+  const rlRaw     = document.getElementById('inp-reflevel').value;
+  const refLevel  = rlRaw !== '' ? parseFloat(rlRaw) : null;
+  const chartType = document.getElementById('inp-charttype').value;
+  const source    = document.getElementById('inp-source').value.trim();
+  const sourceUrl = document.getElementById('inp-source-url').value.trim();
+
+  if (currentId) {
+    const ind = DATA.indicators.find(i => i.id === currentId);
+    if (ind) Object.assign(ind, {name,currency,category,frequency,unit,refLevel,chartType,source,sourceUrl});
+  } else {
+    const newInd = {id:uid(), currency, name, category, frequency, unit, refLevel, chartType, source, sourceUrl, data:[]};
+    DATA.indicators.push(newInd);
+    currentId = newInd.id;
+  }
+
+  persist();
+  document.getElementById('count-badge-bar').textContent = DATA.indicators.length;
+
+  // Aller aux données
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  document.getElementById('modal-title').textContent = '📊 ' + ind.name;
+  document.getElementById('modal-sub').textContent   = ind.currency + ' · ' + (FREQ[ind.frequency] || '');
+  switchTab('data');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  GESTION DES DONNÉES
+// ══════════════════════════════════════════════════════════════════
+function renderDataRows() {
+  const tbody = document.getElementById('data-rows');
+  tbody.innerHTML = '';
+
+  if (!currentId) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-data">Enregistrez d\'abord les paramètres de l\'indicateur.</td></tr>';
+    updateNextLabelHint(null); updateSourceBar(null);
+    return;
+  }
+
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (!ind) return;
+
+  updateNextLabelHint(ind);
+  updateSourceBar(ind);
+
+  if (ind.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-data">Aucune donnée. Cliquez sur ＋ ou utilisez la saisie rapide.</td></tr>';
+    return;
+  }
+
+  const startLast12 = ind.data.length - 12;
+  const unit = ind.unit || '';
+  const ph   = placeholderForUnit(unit);
+
+  ind.data.forEach((row, idx) => {
+    const inLast12 = idx >= startLast12;
+    const combinedVal = buildCombinedStr(row, unit);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="row-num">${idx + 1}</td>
+      <td><input type="text" value="${escHtml(row.label)}" placeholder="ex: Jan 25" onchange="updateLabel(${idx},this.value)"></td>
+      <td>
+        <input type="text"
+          value="${escHtml(combinedVal)}"
+          placeholder="${escHtml(ph)}"
+          style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.02em"
+          onchange="updateCombined(${idx},this.value)"
+          onblur="this.value=buildCombinedStr(DATA.indicators.find(i=>i.id===currentId)?.data[${idx}]||{},DATA.indicators.find(i=>i.id===currentId)?.unit||'')">
+      </td>
+      <td class="row-star">${inLast12 ? '<span style="color:var(--c-pos)">★</span>' : ''}</td>
+      <td><button class="row-del" onclick="deleteRow(${idx})" title="Supprimer">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* Formate un nombre selon l'unité */
+function formatWithUnit(v, unit) {
+  if (v === null || v === undefined || isNaN(v)) return '';
+  const n = parseFloat(v);
+  const u = (unit || '').trim();
+  if (u === '%')                      return n.toFixed(2) + '%';
+  if (u === 'K')                      return Math.round(n) + 'K';
+  if (u === 'M')                      return n.toFixed(1) + 'M';
+  if (u === 'B')                      return n.toFixed(2) + 'B';
+  if (u === 'pts' || u === 'index')   return n.toFixed(1);
+  if (u === '')                       return n.toFixed(2);
+  // Unité générique
+  return n.toFixed(2) + ' ' + u;
+}
+
+/* Exemple de placeholder selon l'unité */
+function placeholderForUnit(unit) {
+  const u = (unit || '').trim();
+  if (u === '%')    return '4.4%   4.3%';
+  if (u === 'K')    return '200K   125K';
+  if (u === 'M')    return '3.2M   3.0M';
+  if (u === 'B')    return '1.25B   1.10B';
+  if (u === 'pts')  return '52.3   51.0';
+  if (u === 'index')return '102.5   101.0';
+  return 'Réel   Attente';
+}
+
+/* Construit la chaîne affichée dans le champ combiné */
+function buildCombinedStr(row, unit) {
+  if (!row || row.value === undefined) return '';
+  let s = formatWithUnit(row.value, unit);
+  if (row.expected !== undefined && row.expected !== null) {
+    s += '\t' + formatWithUnit(row.expected, unit);
+  }
+  return s;
+}
+
+/* Parse "4.4%  4.3%"  ou  "4.4%\t4.3%" → {value, expected} */
+function parseCombined(str) {
+  // Séparer sur tabulation OU sur 2+ espaces OU sur espace simple
+  const parts = str.split(/\t|  +| /)
+    .map(t => t.replace(/,/g, '.').replace(/[^0-9.\-]/g, '').trim())
+    .filter(Boolean);
+  const val = parts.length >= 1 ? parseFloat(parts[0]) : NaN;
+  const exp = parts.length >= 2 ? parseFloat(parts[1]) : null;
+  return {
+    value:    isNaN(val) ? 0 : val,
+    expected: (exp === null || isNaN(exp)) ? undefined : exp,
+  };
+}
+
+function updateCombined(idx, str) {
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (!ind || ind.data[idx] === undefined) return;
+  const parsed = parseCombined(str);
+  ind.data[idx].value    = parsed.value;
+  ind.data[idx].expected = parsed.expected;
+  persist();
+}
+
+function applyQuickPaste(replace) {
+  if (!currentId) return;
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (!ind) return;
+
+  const raw   = document.getElementById('quick-paste-input').value;
+  const lines = raw.split('\n').map(l => l.trimEnd()).filter(Boolean);
+  const parsed = [];
+
+  for (const line of lines) {
+    // ── Stratégie : si la ligne contient des tabulations, on split sur \t
+    //    Sinon on tente de détecter label vs valeurs par les tokens
+    let label = '', valStr = '';
+
+    if (line.includes('\t')) {
+      // Format tabulé : "Jan 25\t4.4%\t4.3%"  ou juste "4.4%\t4.3%"
+      const cols = line.split('\t');
+      // Si la 1ère colonne ne ressemble pas à un nombre → c'est le label
+      const firstIsNum = /^-?[\d]/.test(cols[0].trim().replace(/[^0-9.\-]/g,''));
+      if (!firstIsNum && cols.length >= 2) {
+        label  = cols[0].trim();
+        valStr = cols.slice(1).join('\t');
+      } else {
+        label  = 'Ligne ' + (parsed.length + 1);
+        valStr = line;
+      }
+    } else {
+      // Format espaces : "Jan 25  4.4%  4.3%"
+      // On trouve le dernier bloc de tokens numériques (avec %) en partant de la droite
+      const tokens = line.trim().split(/\s+/);
+      // Un token "valeur" = contient des chiffres et éventuellement % . -
+      // Un token "label" = lettres (mois, trimestre…) ou année seule
+      // Règle : les 1 ou 2 derniers tokens qui ressemblent à des valeurs macro
+      //   (pas un nombre 4 chiffres seul qui serait une année dans le label)
+      const isValue = t => /^-?[\d]/.test(t) && !/^\d{4}$/.test(t.replace(/[^0-9]/g,'').trim());
+      let splitAt = tokens.length;
+      // Cherche en remontant depuis la fin les tokens "valeur"
+      for (let i = tokens.length - 1; i >= 0; i--) {
+        if (isValue(tokens[i])) splitAt = i;
+        else break;
+      }
+      label  = tokens.slice(0, splitAt).join(' ').trim();
+      valStr = tokens.slice(splitAt).join(' ');
+      if (!label) label = 'Ligne ' + (parsed.length + 1);
+    }
+
+    if (!valStr.trim()) continue;
+    const {value, expected} = parseCombined(valStr);
+    if (isNaN(value)) continue;
+    parsed.push({label, value, expected});
+  }
+
+  if (parsed.length === 0) {
+    const st = document.getElementById('quick-paste-status');
+    st.style.display = 'inline'; st.style.color = 'var(--c-neg)';
+    st.textContent = '⚠ Aucune ligne valide détectée.';
+    return;
+  }
+
+  if (replace) {
+    ind.data = parsed;
+  } else {
+    for (const p of parsed) {
+      const existing = ind.data.find(d => d.label.toLowerCase() === p.label.toLowerCase());
+      if (existing) { existing.value = p.value; existing.expected = p.expected; }
+      else ind.data.push(p);
+    }
+  }
+
+  persist();
+  renderDataRows();
+  document.getElementById('quick-paste-input').value = '';
+  const st = document.getElementById('quick-paste-status');
+  st.style.display = 'inline'; st.style.color = 'var(--c-pos)';
+  st.textContent = '✓ ' + parsed.length + ' ligne(s) importée(s)';
+  setTimeout(() => { st.style.display = 'none'; }, 3000);
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function guessNextLabel(ind) {
+  const freq = ind.frequency;
+  const data = ind.data;
+  if (!data.length) return '';
+  const last = data[data.length - 1].label.trim();
+  if (freq === 'monthly') {
+    const FR = ['Jan','Fév','Mar','Avr','Mai','Jui','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    const m = last.match(/^([A-Za-zÀ-ÿ]{2,4})\s+(\d{2,4})$/);
+    if (m) {
+      const mLabel = m[1].substring(0,3);
+      let yr = parseInt(m[2]); if (yr < 100) yr += 2000;
+      const norm = FR.map(x => x.toLowerCase());
+      let idx = norm.indexOf(mLabel.toLowerCase());
+      if (idx === -1) { const EN=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']; idx = EN.indexOf(mLabel.toLowerCase()); }
+      if (idx !== -1) { const ni=(idx+1)%12; const ny=idx===11?yr+1:yr; return FR[ni]+' '+String(ny).slice(-2); }
+    }
+    const m2 = last.match(/^(\d{4})-(\d{2})$/);
+    if (m2) { const d=new Date(parseInt(m2[1]),parseInt(m2[2])-1+1,1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+  }
+  if (freq === 'quarterly') {
+    const m = last.match(/^Q([1-4])\s*['\-]?\s*(\d{2,4})$/i);
+    if (m) { let q=parseInt(m[1]),yr=parseInt(m[2]); if(yr<100)yr+=2000; const nq=q===4?1:q+1,ny=q===4?yr+1:yr; return 'Q'+nq+' '+String(ny).slice(-2); }
+  }
+  if (freq === 'weekly') {
+    const m = last.match(/^[SW](\d{1,2})\s+(\d{2,4})$/i);
+    if (m) { let wk=parseInt(m[1]),yr=parseInt(m[2]); if(yr<100)yr+=2000; const nw=wk>=52?1:wk+1,ny=wk>=52?yr+1:yr; return last[0].toUpperCase()+String(nw).padStart(2,'0')+' '+String(ny).slice(-2); }
+  }
+  return '';
+}
+
+function updateNextLabelHint(ind) {
+  const hint = document.getElementById('next-label-hint');
+  if (!ind || !ind.data.length) { hint.style.display='none'; return; }
+  const next = guessNextLabel(ind);
+  if (next) { hint.style.display='block'; hint.textContent='→ Prochaine période : '+next; }
+  else { hint.style.display='none'; }
+}
+
+function updateSourceBar(ind) {
+  const bar = document.getElementById('source-bar');
+  const cnt = document.getElementById('source-link-content');
+  if (!ind || (!ind.source && !ind.sourceUrl)) { bar.style.display='none'; return; }
+  bar.style.display='flex';
+  const SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\"/></svg>';
+  if (ind.sourceUrl) {
+    const label = ind.source || ind.sourceUrl;
+    cnt.innerHTML = '<a class="source-link-btn" href="'+ind.sourceUrl+'" target="_blank" rel="noopener">'+SVG+' Ouvrir '+label+'</a>';
+    return;
+  }
+  const isUrl = /^https?:\/\//i.test(ind.source)||/^www\./i.test(ind.source);
+  if (isUrl) {
+    const href = ind.source.startsWith('http') ? ind.source : 'https://'+ind.source;
+    cnt.innerHTML = '<a class="source-link-btn" href="'+href+'" target="_blank" rel="noopener">'+SVG+' Ouvrir '+ind.source+'</a>';
+    return;
+  }
+  const q = encodeURIComponent(ind.source+' '+ind.name+' data');
+  cnt.innerHTML = '<a class="source-link-btn" href="https://www.google.com/search?q='+q+'" target="_blank" rel="noopener">'+SVG+' Rechercher "'+ind.source+'"</a>'
+    +'<span class="source-no-link"> — ajoutez une URL dans ⚙️ Paramètres pour un lien direct</span>';
+}
+
+function testSourceUrl() {
+  const url = document.getElementById('inp-source-url').value.trim();
+  if (!url) { alert("Entrez d'abord une URL."); return; }
+  window.open(url.startsWith('http') ? url : 'https://'+url, '_blank', 'noopener');
+}
+
+function addDataRow() {
+  if (!currentId) return;
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (!ind) return;
+  const nextLabel = guessNextLabel(ind);
+  ind.data.push({label: nextLabel, value: 0, expected: undefined});
+  persist();
+  renderDataRows();
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#data-rows tr');
+    const lastRow = rows[rows.length - 1];
+    lastRow?.scrollIntoView({behavior:'smooth', block:'nearest'});
+    lastRow?.querySelector('input[type="number"]')?.focus();
+  }, 60);
+}
+
+function updateLabel(idx, val) {
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (ind?.data[idx] !== undefined) { ind.data[idx].label = val; persist(); }
+}
+
+function updateValue(idx, val) {
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (ind?.data[idx] !== undefined) { ind.data[idx].value = parseFloat(val) || 0; persist(); }
+}
+
+function updateForecast(idx, val) {
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (ind?.data[idx] !== undefined) {
+    ind.data[idx].forecast = val === '' ? null : (parseFloat(val) || 0);
+    persist();
+  }
+}
+
+function updatePrevious(idx, val) {
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (ind?.data[idx] !== undefined) {
+    ind.data[idx].previous = val === '' ? null : (parseFloat(val) || 0);
+    persist();
+  }
+}
+
+function updateExpected(idx, val) {
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (ind?.data[idx] !== undefined) {
+    const v = val.trim();
+    ind.data[idx].expected = v === '' ? undefined : parseFloat(v);
+    persist();
+  }
+}
+
+function deleteRow(idx) {
+  const ind = DATA.indicators.find(i => i.id === currentId);
+  if (!ind) return;
+  ind.data.splice(idx, 1);
+  persist();
+  renderDataRows();
+}
+
+function saveData() {
+  persist();
+  closeModal(); // buildGrid() appelé dans closeModal()
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SUPPRIMER UN INDICATEUR
+// ══════════════════════════════════════════════════════════════════
+function deleteInd(id) {
+  const ind = DATA.indicators.find(i => i.id === id);
+  if (!ind) return;
+  if (!confirm(`Supprimer l'indicateur "${ind.name}" (${ind.currency}) ?\nToutes ses données seront perdues.`)) return;
+  DATA.indicators = DATA.indicators.filter(i => i.id !== id);
+  persist();
+  // Init filtres
+document.querySelectorAll('[data-f="country"][data-v="all"]').forEach(b=>b.classList.add('active','fbtn-all'));
+document.querySelectorAll('[data-f="cat"][data-v="all-cat"]').forEach(b=>b.classList.add('active','fbtn-all'));
+buildGrid();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════
+const savedDate = localStorage.getItem('fxmd_v3_upd');
+document.getElementById('last-update').textContent = savedDate || 'Données exemples';
+document.getElementById('nav-right').textContent = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+// Init filtres
+document.querySelectorAll('[data-f="country"][data-v="all"]').forEach(b=>b.classList.add('active','fbtn-all'));
+document.querySelectorAll('[data-f="cat"][data-v="all-cat"]').forEach(b=>b.classList.add('active','fbtn-all'));
+buildGrid();
+</script>
+</body>
+</html>
