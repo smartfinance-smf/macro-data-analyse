@@ -219,6 +219,31 @@ header{
 .fbtn-all.active{background:#1e2d3d!important;color:var(--text)!important;border-color:transparent!important;}
 
 
+
+
+/* ── FLÈCHES RÉORGANISATION ── */
+.card-move-btns{
+  display:flex;flex-direction:column;gap:2px;
+  flex-shrink:0;margin-left:2px;
+}
+.move-btn{
+  background:transparent;border:none;
+  color:rgba(61,79,96,.45);
+  cursor:pointer;padding:1px 4px;font-size:9px;line-height:1;
+  border-radius:3px;transition:all .15s;
+  font-family:'Space Mono',monospace;
+}
+.move-btn:hover{
+  color:var(--c-inflation);
+  background:rgba(77,158,216,.1);
+}
+.move-btn:disabled{
+  opacity:.12;cursor:default;
+}
+.move-btn:disabled:hover{
+  background:transparent;color:rgba(61,79,96,.25);
+}
+
 /* ── REMINDER MODAL ── */
 #reminder-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:800;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 #reminder-overlay.open{display:flex;}
@@ -665,16 +690,13 @@ function doLogout() {
 }
 
 function applyRoleRestrictions() {
-  const isReadOnly = currentUser?.role !== 'admin';
-  // Edit/add buttons in header and cards
-  const editTargets = [
-    document.querySelector('.add-ind-btn'),
-  ];
-  editTargets.forEach(el => {
-    if (!el) return;
-    if (isReadOnly) el.classList.add('ro-lock');
-    else el.classList.remove('ro-lock');
-  });
+  const isAdmin = currentUser?.role === 'admin';
+  const isReadOnly = !isAdmin;
+  const addBtn = document.querySelector('.add-ind-btn');
+  if (addBtn) {
+    if (isReadOnly) addBtn.classList.add('ro-lock');
+    else addBtn.classList.remove('ro-lock');
+  }
 }
 
 function canEdit() {
@@ -1006,6 +1028,7 @@ function buildCard(ind) {
     ? `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:9px;border:1px dashed var(--border);border-radius:6px;">Aucune donnée — cliquez sur 📊 Données</div>`
     : `<div id="chart-${ind.id}" style="width:100%;height:100%;"></div>`;
 
+
   card.innerHTML = `
     <div class="card-head">
       <span class="card-flag">${getCurFlag(ind.currency)}</span>
@@ -1023,7 +1046,7 @@ function buildCard(ind) {
         ${refSide}
       </div>
       <span class="cat-tag" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.border}">${cat.emoji} ${cat.label.toUpperCase()}</span>
-      <div class="card-actions">
+      <div class="card-actions" id="ca-${ind.id}">
         <button class="cbtn data-btn" onclick="openDataModal('${ind.id}')">📊</button>
         <button class="cbtn" onclick="openEditModal('${ind.id}')">⚙️</button>
         <button class="cbtn del-btn" onclick="deleteInd('${ind.id}')">✕</button>
@@ -1033,6 +1056,27 @@ function buildCard(ind) {
       ${chartOrEmpty}
     </div>
   `;
+  // Inject move buttons for Admin
+  if (currentUser && currentUser.role === 'admin') {
+    const actionsDiv = card.querySelector('#ca-' + ind.id);
+    if (actionsDiv) {
+      const moveDiv = document.createElement('div');
+      moveDiv.className = 'card-move-btns';
+      const btnUp = document.createElement('button');
+      btnUp.className = 'move-btn';
+      btnUp.title = 'Monter';
+      btnUp.textContent = '▲';
+      btnUp.onclick = function(e) { e.stopPropagation(); moveInd(ind.id, -1); };
+      const btnDown = document.createElement('button');
+      btnDown.className = 'move-btn';
+      btnDown.title = 'Descendre';
+      btnDown.textContent = '▼';
+      btnDown.onclick = function(e) { e.stopPropagation(); moveInd(ind.id, 1); };
+      moveDiv.appendChild(btnUp);
+      moveDiv.appendChild(btnDown);
+      actionsDiv.insertBefore(moveDiv, actionsDiv.firstChild);
+    }
+  }
   return card;
 }
 
@@ -1699,6 +1743,33 @@ document.querySelectorAll('[data-f="cat"][data-v="all-cat"]').forEach(b=>b.class
 buildGrid();
 }
 
+
+
+
+// ══════════════════════════════════════════════════════════════════
+//  RÉORGANISATION — FLÈCHES ▲ ▼
+// ══════════════════════════════════════════════════════════════════
+function moveInd(id, direction) {
+  if (!canEdit()) return;
+  const idx = DATA.indicators.findIndex(i => i.id === id);
+  if (idx === -1) return;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= DATA.indicators.length) return;
+
+  // Swap
+  const tmp = DATA.indicators[idx];
+  DATA.indicators[idx] = DATA.indicators[newIdx];
+  DATA.indicators[newIdx] = tmp;
+
+  persist();
+
+  // Rebuild grid et scroll vers la carte déplacée
+  buildGrid();
+  setTimeout(() => {
+    const card = document.querySelector('[data-id="' + id + '"]');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 80);
+}
 
 // ══════════════════════════════════════════════════════════════════
 //  SYSTÈME DE RAPPEL — MISE À JOUR DES INDICATEURS
