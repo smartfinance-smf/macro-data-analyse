@@ -6,6 +6,8 @@
 <title>FX MacroDash v3 — Indicateurs Libres</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --bg:#080b10; --s1:#0d1117; --s2:#131920; --border:#1c2430; --b2:#253040;
@@ -215,9 +217,151 @@ header{
   display:flex;align-items:center;gap:4px;
 }
 .fbtn-all.active{background:#1e2d3d!important;color:var(--text)!important;border-color:transparent!important;}
+
+
+/* ── REMINDER MODAL ── */
+#reminder-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:800;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+#reminder-overlay.open{display:flex;}
+#reminder-modal{background:var(--s1);border:1px solid var(--c-neg);border-radius:16px;width:min(640px,96vw);max-height:92vh;overflow-y:auto;padding:0;animation:slideUp .25s ease;box-shadow:0 0 60px rgba(224,80,96,.15);}
+.rem-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.rem-icon{font-size:28px;}
+.rem-head-info{flex:1;}
+.rem-head-info h2{font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--c-neg);}
+.rem-head-info p{font-size:10px;color:var(--muted);margin-top:3px;}
+.rem-skip{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:6px 14px;font-size:10px;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.rem-skip:hover{border-color:var(--muted);color:var(--text);}
+.rem-body{padding:16px 24px 24px;}
+.rem-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.rem-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;}
+.rem-item:hover{border-color:var(--c-inflation);background:rgba(77,158,216,.06);}
+.rem-item-flag{font-size:18px;}
+.rem-item-info{flex:1;}
+.rem-item-name{font-size:12px;font-weight:700;}
+.rem-item-meta{font-size:9px;color:var(--muted);margin-top:2px;}
+.rem-item-late{font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;background:rgba(224,80,96,.12);color:var(--c-neg);border:1px solid rgba(224,80,96,.2);white-space:nowrap;}
+.rem-item-soon{font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;background:rgba(232,197,90,.1);color:var(--c-croissance);border:1px solid rgba(232,197,90,.2);white-space:nowrap;}
+.rem-fill-btn{padding:6px 14px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--c-inflation);background:rgba(77,158,216,.1);color:var(--c-inflation);font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;}
+.rem-fill-btn:hover{background:rgba(77,158,216,.22);}
+.rem-done-btn{width:100%;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--c-emplois);color:#fff;font-family:'DM Sans',sans-serif;transition:all .2s;letter-spacing:.02em;}
+.rem-done-btn:hover{background:#2aaf72;}
+
+/* ── FREQ SETTING on card ── */
+.freq-setting{font-size:8px;color:var(--muted);display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.freq-pill{font-family:'Space Mono',monospace;font-size:7px;padding:1px 6px;border-radius:3px;background:rgba(77,158,216,.1);color:var(--c-inflation);border:1px solid rgba(77,158,216,.18);}
+
+/* ── AUTH SCREEN ── */
+#auth-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Sans',sans-serif;
+}
+.auth-box{
+  background:var(--s1);border:1px solid var(--border);border-radius:16px;
+  padding:36px 40px;width:min(400px,92vw);
+  box-shadow:0 24px 80px rgba(0,0,0,.7);
+  animation:slideUp .3s ease;
+}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+.auth-logo-dot{width:9px;height:9px;border-radius:50%;background:var(--c-pos);box-shadow:0 0 10px var(--c-pos);animation:blink 2s ease infinite;}
+.auth-logo-text{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;letter-spacing:-.02em;}
+.auth-title{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
+.auth-sub{font-size:11px;color:var(--muted);margin-bottom:28px;}
+.auth-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.auth-field label{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.auth-field input{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;
+  outline:none;transition:border-color .15s;
+}
+.auth-field input:focus{border-color:var(--c-inflation);}
+.auth-btn{
+  width:100%;padding:11px;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;border:none;background:var(--c-inflation);color:#fff;
+  font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:6px;letter-spacing:.02em;
+}
+.auth-btn:hover{background:#3a8ec8;transform:translateY(-1px);box-shadow:0 4px 16px rgba(77,158,216,.3);}
+.auth-error{font-size:11px;color:var(--c-neg);text-align:center;margin-top:10px;display:none;padding:8px;background:rgba(224,80,96,.08);border:1px solid rgba(224,80,96,.2);border-radius:6px;}
+.auth-accounts{margin-top:22px;padding-top:16px;border-top:1px solid var(--border);}
+.auth-accounts-title{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.auth-account-pill{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;
+  background:var(--s2);border:1px solid var(--border);margin-bottom:6px;cursor:pointer;
+  transition:all .15s;
+}
+.auth-account-pill:hover{border-color:var(--b2);background:var(--b2);}
+.auth-pill-icon{font-size:16px;}
+.auth-pill-info{flex:1;}
+.auth-pill-name{font-size:11px;font-weight:700;}
+.auth-pill-role{font-size:9px;color:var(--muted);}
+.auth-pill-badge{font-size:8px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:.06em;}
+.badge-admin{background:rgba(155,109,212,.15);color:var(--gbp);border:1px solid rgba(155,109,212,.25);}
+.badge-smf{background:rgba(60,191,130,.12);color:var(--c-emplois);border:1px solid rgba(60,191,130,.2);}
+.badge-ro{background:rgba(77,158,216,.1);color:var(--c-inflation);border:1px solid rgba(77,158,216,.18);}
+
+/* ── USER BADGE (header) ── */
+#user-badge{
+  display:flex;align-items:center;gap:6px;padding:3px 10px 3px 6px;
+  border-radius:20px;border:1px solid var(--border);background:var(--s2);
+  font-size:9px;cursor:default;
+}
+#user-badge-icon{font-size:13px;}
+#user-badge-name{font-weight:700;color:var(--text);}
+#user-badge-role{color:var(--muted);font-size:8px;}
+#logout-btn{
+  padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;
+  cursor:pointer;border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+#logout-btn:hover{border-color:var(--c-neg);color:var(--c-neg);}
+
+/* ── READ-ONLY LOCK ── */
+.ro-lock{opacity:.35;pointer-events:none!important;cursor:not-allowed!important;}
 </style>
 </head>
 <body>
+
+<!-- ── AUTH SCREEN ── -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <span class="auth-logo-dot"></span>
+      <span class="auth-logo-text">FX MacroDash</span>
+    </div>
+    <div class="auth-title">Connexion</div>
+    <div class="auth-sub">Accédez à votre tableau de bord macro-économique</div>
+
+    <div class="auth-accounts">
+      <div class="auth-accounts-title">Sélectionnez un compte</div>
+      <div class="auth-account-pill" onclick="selectAccount('Admin')">
+        <span class="auth-pill-icon">👑</span>
+        <div class="auth-pill-info">
+          <div class="auth-pill-name">Admin</div>
+          <div class="auth-pill-role">Accès complet — modification & gestion</div>
+        </div>
+        <span class="auth-pill-badge badge-admin">ADMIN</span>
+      </div>
+      <div class="auth-account-pill" onclick="selectAccount('SMF')">
+        <span class="auth-pill-icon">📊</span>
+        <div class="auth-pill-info">
+          <div class="auth-pill-name">SMF</div>
+          <div class="auth-pill-role">Accès lecture seule</div>
+        </div>
+        <span class="auth-pill-badge badge-smf">SMF</span>
+      </div>
+    </div>
+
+    <div class="auth-field" id="auth-user-field" style="margin-top:18px;">
+      <label>Utilisateur</label>
+      <input type="text" id="auth-username" placeholder="Sélectionnez un compte ci-dessus" readonly>
+    </div>
+    <div class="auth-field">
+      <label>Mot de passe</label>
+      <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="auth-btn" onclick="doLogin()">→ Se connecter</button>
+    <div class="auth-error" id="auth-error">Identifiants incorrects. Veuillez réessayer.</div>
+  </div>
+</div>
 
 <header>
   <div class="brand"><span class="brand-dot"></span>FX MacroDash</div>
@@ -249,6 +393,12 @@ header{
   </div>
 
   <div class="nav-right" id="nav-right">—</div>
+  <div id="user-badge" style="display:none">
+    <span id="user-badge-icon">👤</span>
+    <span id="user-badge-name">—</span>
+    <span id="user-badge-role"></span>
+  </div>
+  <button id="logout-btn" onclick="doLogout()" style="display:none">⏻ Déconnecter</button>
 </header>
 
 <!-- ── MODAL ── -->
@@ -305,6 +455,23 @@ header{
                 <option value="monthly">Mensuelle</option>
                 <option value="quarterly">Trimestrielle</option>
                 <option value="weekly">Hebdomadaire</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Délai rappel (jours) <span style="font-weight:400;text-transform:none;letter-spacing:0">— ex: 30 pour mensuel</span></label>
+              <input type="number" min="1" max="365" id="inp-interval" placeholder="ex: 30 · 7 · 90" title="Nombre de jours entre deux publications">
+            </div>
+            <div class="field">
+              <label>Jour de publication habituel</label>
+              <select id="inp-pubday">
+                <option value="">— Aucun jour spécifique —</option>
+                <option value="0">Dimanche</option>
+                <option value="1">Lundi</option>
+                <option value="2">Mardi</option>
+                <option value="3">Mercredi</option>
+                <option value="4">Jeudi</option>
+                <option value="5">Vendredi</option>
+                <option value="6">Samedi</option>
               </select>
             </div>
             <div class="field">
@@ -399,6 +566,25 @@ header{
   </div><!-- /modal -->
 </div><!-- /modal-overlay -->
 
+
+<!-- ── REMINDER MODAL ── -->
+<div id="reminder-overlay">
+  <div id="reminder-modal">
+    <div class="rem-head">
+      <span class="rem-icon">⚠️</span>
+      <div class="rem-head-info">
+        <h2 id="rem-title">Mise à jour requise</h2>
+        <p id="rem-sub">Les indicateurs suivants n'ont pas été mis à jour selon leur fréquence de publication.</p>
+      </div>
+      <button class="rem-skip" onclick="closeReminder()">Ignorer pour l'instant</button>
+    </div>
+    <div class="rem-body">
+      <div class="rem-list" id="rem-list"></div>
+      <button class="rem-done-btn" onclick="closeReminder()">✓ Je mettrai à jour plus tard</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── GRID ── -->
 <div class="grid" id="grid"></div>
 
@@ -407,12 +593,175 @@ header{
   <span id="count-badge-bar">0</span> indicateur(s)
   <span style="margin:0 8px;opacity:.3">·</span>
   Dernière modif. : <span id="last-update" style="color:var(--c-emplois);font-weight:600">—</span>
+  <span style="margin:0 8px;opacity:.3">·</span>
+  <span id="sync-status" style="font-family:'Space Mono',monospace;font-size:8px;transition:all .3s;"></span>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
-//  CONSTANTES
+//  AUTHENTIFICATION
 // ══════════════════════════════════════════════════════════════════
+const ACCOUNTS = {
+  'Admin': { password: '77', role: 'admin', icon: '👑', label: 'Administrateur', badge: 'ADMIN' },
+  'SMF':   { password: 'smf',   role: 'smf',   icon: '📊', label: 'SMF — Lecture seule', badge: 'SMF' },
+};
+
+let currentUser = null;
+
+function selectAccount(username) {
+  document.getElementById('auth-username').value = username;
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-password').focus();
+  // Highlight selected pill
+  document.querySelectorAll('.auth-account-pill').forEach(p => p.style.borderColor = '');
+  event.currentTarget.style.borderColor = 'var(--c-inflation)';
+}
+
+function doLogin() {
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+
+  const account = ACCOUNTS[username];
+  if (!account || account.password !== password) {
+    errEl.style.display = 'block';
+    document.getElementById('auth-password').value = '';
+    document.getElementById('auth-password').focus();
+    return;
+  }
+
+  // Auth success
+  currentUser = { username, ...account };
+  errEl.style.display = 'none';
+
+  // Hide auth screen
+  document.getElementById('auth-screen').style.display = 'none';
+
+  // Show user badge
+  document.getElementById('user-badge').style.display = 'flex';
+  document.getElementById('user-badge-icon').textContent = account.icon;
+  document.getElementById('user-badge-name').textContent = username;
+  document.getElementById('user-badge-role').textContent = account.label;
+  document.getElementById('logout-btn').style.display = 'block';
+
+  // Apply role restrictions
+  applyRoleRestrictions();
+
+  // Init app
+  initApp();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-screen').style.opacity = '1';
+  document.getElementById('user-badge').style.display = 'none';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('auth-username').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-error').style.display = 'none';
+  document.querySelectorAll('.auth-account-pill').forEach(p => p.style.borderColor = '');
+}
+
+function applyRoleRestrictions() {
+  const isReadOnly = currentUser?.role !== 'admin';
+  // Edit/add buttons in header and cards
+  const editTargets = [
+    document.querySelector('.add-ind-btn'),
+  ];
+  editTargets.forEach(el => {
+    if (!el) return;
+    if (isReadOnly) el.classList.add('ro-lock');
+    else el.classList.remove('ro-lock');
+  });
+}
+
+function canEdit() {
+  if (!currentUser || currentUser.role !== 'admin') {
+    alert('⛔ Accès refusé — Seul le compte Admin peut modifier les données.');
+    return false;
+  }
+  return true;
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+//  FIREBASE CONFIG & INIT
+// ══════════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyCne4G3T-dLYyNu31RRi-HNFTXjASnPVNE",
+  authDomain: "fir-m-f.firebaseapp.com",
+  projectId: "fir-m-f",
+  storageBucket: "fir-m-f.firebasestorage.app",
+  messagingSenderId: "567813195919",
+  appId: "1:567813195919:web:b857fdb2e0d6d46510c8fa"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const DOC_REF = db.collection('fxmacrodash').doc('indicators');
+
+function setSyncStatus(status) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  const map = {
+    idle:    { text: '', color: 'var(--muted)' },
+    saving:  { text: '☁ Sauvegarde...', color: 'var(--c-croissance)' },
+    saved:   { text: '✓ Sauvegardé dans Firebase', color: 'var(--c-emplois)' },
+    error:   { text: '✕ Erreur Firebase', color: 'var(--c-neg)' },
+    loading: { text: '⟳ Chargement Firebase...', color: 'var(--c-inflation)' },
+  };
+  const s = map[status] || map.idle;
+  el.textContent = s.text;
+  el.style.color = s.color;
+  if (status === 'saved') setTimeout(() => setSyncStatus('idle'), 3000);
+}
+
+async function loadFromFirebase() {
+  setSyncStatus('loading');
+  try {
+    const doc = await DOC_REF.get();
+    if (doc.exists) {
+      const remote = doc.data();
+      DATA.indicators = remote.indicators || DATA.indicators;
+      const upd = remote._lastUpdate || null;
+      if (upd) {
+        localStorage.setItem('fxmd_v3_upd', upd);
+        document.getElementById('last-update').textContent = upd;
+      }
+      localStorage.setItem('fxmd_v3', JSON.stringify(DATA));
+    } else {
+      await saveToFirebase();
+    }
+    setSyncStatus('idle');
+    buildGrid();
+    setTimeout(checkAndShowReminder, 800);
+  } catch(e) {
+    console.error('Firebase load error:', e);
+    setSyncStatus('error');
+    buildGrid();
+    setTimeout(checkAndShowReminder, 800);
+  }
+}
+
+async function saveToFirebase() {
+  setSyncStatus('saving');
+  try {
+    const now = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const payload = { indicators: DATA.indicators, _lastUpdate: now };
+    await DOC_REF.set(payload);
+    localStorage.setItem('fxmd_v3', JSON.stringify(DATA));
+    localStorage.setItem('fxmd_v3_upd', now);
+    document.getElementById('last-update').textContent = now;
+    setSyncStatus('saved');
+  } catch(e) {
+    console.error('Firebase save error:', e);
+    setSyncStatus('error');
+  }
+}
+
+
 const CURRENCIES = [
   {code:'USD',flag:'🇺🇸',name:'États-Unis'},
   {code:'CAD',flag:'🇨🇦',name:'Canada'},
@@ -527,6 +876,8 @@ function persist() {
   const now = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
   localStorage.setItem('fxmd_v3_upd', now);
   document.getElementById('last-update').textContent = now;
+  // Sync Firebase
+  saveToFirebase();
 }
 
 function destroyCharts() {
@@ -903,6 +1254,8 @@ function _fillForm(ind) {
   document.getElementById('inp-charttype').value = ind.chartType || 'line';
   document.getElementById('inp-source').value    = ind.source || '';
   document.getElementById('inp-source-url').value = ind.sourceUrl || '';
+  document.getElementById('inp-interval').value  = ind.intervalDays || '';
+  document.getElementById('inp-pubday').value    = ind.pubDay !== undefined && ind.pubDay !== null ? String(ind.pubDay) : '';
 }
 
 function _clearForm() {
@@ -915,6 +1268,8 @@ function _clearForm() {
   document.getElementById('inp-charttype').value = 'line';
   document.getElementById('inp-source').value    = '';
   document.getElementById('inp-source-url').value = '';
+  document.getElementById('inp-interval').value  = '';
+  document.getElementById('inp-pubday').value    = '';
 }
 
 function showModal() {
@@ -933,6 +1288,7 @@ buildGrid();
 
 // ── Ouvrir : nouvel indicateur ──
 function openAddModal() {
+  if (!canEdit()) return;
   currentId = null;
   _clearForm();
   document.getElementById('modal-title').textContent = 'Nouvel indicateur';
@@ -943,6 +1299,7 @@ function openAddModal() {
 
 // ── Ouvrir : éditer paramètres ──
 function openEditModal(id) {
+  if (!canEdit()) return;
   currentId = id;
   const ind = DATA.indicators.find(i => i.id === id);
   if (!ind) return;
@@ -955,6 +1312,7 @@ function openEditModal(id) {
 
 // ── Ouvrir : saisir données ──
 function openDataModal(id) {
+  if (!canEdit()) return;
   currentId = id;
   const ind = DATA.indicators.find(i => i.id === id);
   if (!ind) return;
@@ -981,12 +1339,16 @@ function saveParams() {
   const chartType = document.getElementById('inp-charttype').value;
   const source    = document.getElementById('inp-source').value.trim();
   const sourceUrl = document.getElementById('inp-source-url').value.trim();
+  const intervalRaw = document.getElementById('inp-interval').value;
+  const intervalDays = intervalRaw !== '' ? parseInt(intervalRaw) : null;
+  const pubDayRaw = document.getElementById('inp-pubday').value;
+  const pubDay = pubDayRaw !== '' ? parseInt(pubDayRaw) : null;
 
   if (currentId) {
     const ind = DATA.indicators.find(i => i.id === currentId);
-    if (ind) Object.assign(ind, {name,currency,category,frequency,unit,refLevel,chartType,source,sourceUrl});
+    if (ind) Object.assign(ind, {name,currency,category,frequency,unit,refLevel,chartType,source,sourceUrl,intervalDays,pubDay});
   } else {
-    const newInd = {id:uid(), currency, name, category, frequency, unit, refLevel, chartType, source, sourceUrl, data:[]};
+    const newInd = {id:uid(), currency, name, category, frequency, unit, refLevel, chartType, source, sourceUrl, intervalDays, pubDay, data:[]};
     DATA.indicators.push(newInd);
     currentId = newInd.id;
   }
@@ -1325,6 +1687,7 @@ function saveData() {
 //  SUPPRIMER UN INDICATEUR
 // ══════════════════════════════════════════════════════════════════
 function deleteInd(id) {
+  if (!canEdit()) return;
   const ind = DATA.indicators.find(i => i.id === id);
   if (!ind) return;
   if (!confirm(`Supprimer l'indicateur "${ind.name}" (${ind.currency}) ?\nToutes ses données seront perdues.`)) return;
@@ -1336,16 +1699,149 @@ document.querySelectorAll('[data-f="cat"][data-v="all-cat"]').forEach(b=>b.class
 buildGrid();
 }
 
+
 // ══════════════════════════════════════════════════════════════════
-//  INIT
+//  SYSTÈME DE RAPPEL — MISE À JOUR DES INDICATEURS
 // ══════════════════════════════════════════════════════════════════
-const savedDate = localStorage.getItem('fxmd_v3_upd');
-document.getElementById('last-update').textContent = savedDate || 'Données exemples';
-document.getElementById('nav-right').textContent = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-// Init filtres
-document.querySelectorAll('[data-f="country"][data-v="all"]').forEach(b=>b.classList.add('active','fbtn-all'));
-document.querySelectorAll('[data-f="cat"][data-v="all-cat"]').forEach(b=>b.classList.add('active','fbtn-all'));
-buildGrid();
+
+const DAYS_FR = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+
+// Calcule si un indicateur doit être mis à jour
+function needsUpdate(ind) {
+  // Pas de délai configuré → pas de rappel
+  if (!ind.intervalDays) return null;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const todayDay = today.getDay(); // 0=dim ... 6=sam
+
+  // Date de la dernière entrée
+  let lastEntryDate = null;
+  if (ind.data && ind.data.length > 0) {
+    // On utilise la date de la dernière sauvegarde comme proxy
+    // car les labels sont textuels (ex: "Mar 25")
+    // On compare avec intervalDays depuis le dernier label
+    lastEntryDate = estimateDateFromLabel(ind.data[ind.data.length - 1].label);
+  }
+
+  const daysSinceLast = lastEntryDate
+    ? Math.floor((today - lastEntryDate) / 86400000)
+    : 999;
+
+  const isLate = daysSinceLast >= ind.intervalDays;
+  const isDueToday = ind.pubDay !== null && ind.pubDay !== undefined && todayDay === ind.pubDay;
+  const isDueSoon = ind.pubDay !== null && ind.pubDay !== undefined
+    && ((todayDay + 1) % 7 === ind.pubDay || todayDay === ind.pubDay);
+
+  if (!isLate && !isDueToday) return null;
+
+  return {
+    late: daysSinceLast,
+    isDueToday,
+    isDueSoon,
+    daysSinceLast
+  };
+}
+
+// Tente de parser un label de période en Date
+function estimateDateFromLabel(label) {
+  if (!label) return null;
+  const FR = {jan:0,fév:1,feb:1,mar:2,avr:3,apr:3,mai:4,may:4,jui:5,jun:5,jul:6,
+               aoû:7,aug:7,sep:8,oct:9,nov:10,déc:11,dec:11};
+  // "Mar 25" → mois, année
+  const m = label.trim().match(/^([A-Za-zÀ-ÿ]{2,4})\s+(\d{2,4})$/);
+  if (m) {
+    const mKey = m[1].toLowerCase().substring(0,3);
+    let yr = parseInt(m[2]); if (yr < 100) yr += 2000;
+    const mo = FR[mKey];
+    if (mo !== undefined) {
+      // Date = dernier jour du mois
+      return new Date(yr, mo + 1, 0);
+    }
+  }
+  // "Q1 25"
+  const q = label.match(/Q([1-4])\s*(\d{2,4})/i);
+  if (q) {
+    let yr = parseInt(q[2]); if (yr < 100) yr += 2000;
+    const endMonth = parseInt(q[1]) * 3;
+    return new Date(yr, endMonth, 0);
+  }
+  return null;
+}
+
+function checkAndShowReminder() {
+  // Seulement pour Admin
+  if (!currentUser || currentUser.role !== 'admin') return;
+
+  const pending = [];
+  DATA.indicators.forEach(ind => {
+    const status = needsUpdate(ind);
+    if (status) pending.push({ ind, status });
+  });
+
+  if (!pending.length) return;
+
+  // Construire la liste
+  const list = document.getElementById('rem-list');
+  list.innerHTML = '';
+
+  pending.forEach(({ ind, status }) => {
+    const cat = getCat(ind.category);
+    const flag = getCurFlag(ind.currency);
+    const badge = status.isDueToday
+      ? `<span class="rem-item-late">📅 Publication aujourd'hui !</span>`
+      : `<span class="rem-item-late">⏰ ${status.daysSinceLast}j sans mise à jour</span>`;
+
+    const intervalInfo = ind.intervalDays ? `Tous les ${ind.intervalDays} jours` : '';
+    const pubDayInfo = ind.pubDay !== null && ind.pubDay !== undefined
+      ? ` · Publication le ${DAYS_FR[ind.pubDay]}` : '';
+
+    const item = document.createElement('div');
+    item.className = 'rem-item';
+    item.innerHTML = `
+      <span class="rem-item-flag">${flag}</span>
+      <div class="rem-item-info">
+        <div class="rem-item-name">${ind.currency} — ${ind.name}</div>
+        <div class="rem-item-meta">${intervalInfo}${pubDayInfo} · <span style="color:${cat.color}">${cat.emoji} ${cat.label}</span></div>
+      </div>
+      ${badge}
+      <button class="rem-fill-btn" onclick="openDataFromReminder('${ind.id}')">📊 Remplir</button>
+    `;
+    list.appendChild(item);
+  });
+
+  const title = pending.length === 1
+    ? '1 indicateur à mettre à jour'
+    : `${pending.length} indicateurs à mettre à jour`;
+  document.getElementById('rem-title').textContent = title;
+
+  // Afficher
+  document.getElementById('reminder-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function openDataFromReminder(id) {
+  closeReminder();
+  setTimeout(() => openDataModal(id), 200);
+}
+
+function closeReminder() {
+  document.getElementById('reminder-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT (lancé après login)
+// ══════════════════════════════════════════════════════════════════
+function initApp() {
+  const savedDate = localStorage.getItem('fxmd_v3_upd');
+  document.getElementById('last-update').textContent = savedDate || 'Chargement...';
+  document.getElementById('nav-right').textContent = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  document.querySelectorAll('[data-f="country"][data-v="all"]').forEach(b=>b.classList.add('active','fbtn-all'));
+  document.querySelectorAll('[data-f="cat"][data-v="all-cat"]').forEach(b=>b.classList.add('active','fbtn-all'));
+  // Charger depuis Firebase (buildGrid() appelé dedans)
+  loadFromFirebase();
+}
 </script>
 </body>
 </html>
