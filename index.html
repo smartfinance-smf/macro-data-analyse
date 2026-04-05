@@ -515,16 +515,12 @@ header{
                 <option value="stepped">Escalier (taux)</option>
               </select>
             </div>
-            <div class="field">
-              <label>Source — Nom court</label>
-              <input type="text" id="inp-source" placeholder="ex: BLS · Eurostat · ONS…">
-            </div>
-            <div class="field full">
-              <label>Source — URL directe <span style="font-weight:400;text-transform:none;letter-spacing:0">(collez le lien ici)</span></label>
-              <div style="display:flex;gap:6px;align-items:center;">
-                <input type="url" id="inp-source-url" placeholder="https://www.bls.gov/cpi/ …" style="flex:1">
-                <button type="button" onclick="testSourceUrl()" style="flex-shrink:0;padding:7px 12px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--s2);color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;">🔗 Tester</button>
-              </div>
+            <div class="field full" id="sources-field">
+              <label style="display:flex;align-items:center;justify-content:space-between;">
+                <span>Sources <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:8px;color:var(--muted)">— ajoutez autant de sources que nécessaire</span></span>
+                <button type="button" onclick="addSourceRow()" style="padding:3px 10px;border-radius:5px;font-size:9px;font-weight:700;cursor:pointer;border:1px solid rgba(60,191,130,.4);background:rgba(60,191,130,.08);color:var(--c-emplois);font-family:'DM Sans',sans-serif;transition:all .15s;">＋ Source</button>
+              </label>
+              <div id="sources-list" style="display:flex;flex-direction:column;gap:6px;margin-top:4px;"></div>
             </div>
           </div>
         </div>
@@ -1296,10 +1292,16 @@ function _fillForm(ind) {
   document.getElementById('inp-unit').value      = ind.unit || '';
   document.getElementById('inp-reflevel').value  = ind.refLevel ?? '';
   document.getElementById('inp-charttype').value = ind.chartType || 'line';
-  document.getElementById('inp-source').value    = ind.source || '';
-  document.getElementById('inp-source-url').value = ind.sourceUrl || '';
   document.getElementById('inp-interval').value  = ind.intervalDays || '';
   document.getElementById('inp-pubday').value    = ind.pubDay !== undefined && ind.pubDay !== null ? String(ind.pubDay) : '';
+  // Multi-sources : compat avec l'ancien format source/sourceUrl
+  let sources = ind.sources;
+  if (!sources || !sources.length) {
+    sources = (ind.source || ind.sourceUrl)
+      ? [{ name: ind.source || '', url: ind.sourceUrl || '' }]
+      : [];
+  }
+  renderSourceRows(sources);
 }
 
 function _clearForm() {
@@ -1310,11 +1312,12 @@ function _clearForm() {
   document.getElementById('inp-unit').value      = '%';
   document.getElementById('inp-reflevel').value  = '';
   document.getElementById('inp-charttype').value = 'line';
-  document.getElementById('inp-source').value    = '';
-  document.getElementById('inp-source-url').value = '';
   document.getElementById('inp-interval').value  = '';
   document.getElementById('inp-pubday').value    = '';
+  renderSourceRows([]);
 }
+
+// (merged into _fillForm block above)
 
 function showModal() {
   document.getElementById('modal-overlay').classList.add('open');
@@ -1381,18 +1384,22 @@ function saveParams() {
   const rlRaw     = document.getElementById('inp-reflevel').value;
   const refLevel  = rlRaw !== '' ? parseFloat(rlRaw) : null;
   const chartType = document.getElementById('inp-charttype').value;
-  const source    = document.getElementById('inp-source').value.trim();
-  const sourceUrl = document.getElementById('inp-source-url').value.trim();
   const intervalRaw = document.getElementById('inp-interval').value;
   const intervalDays = intervalRaw !== '' ? parseInt(intervalRaw) : null;
   const pubDayRaw = document.getElementById('inp-pubday').value;
   const pubDay = pubDayRaw !== '' ? parseInt(pubDayRaw) : null;
 
+  // Collecter toutes les sources depuis les lignes dynamiques
+  const sources = collectSources();
+  // Compat descendante : première source → source / sourceUrl
+  const source    = sources.length ? sources[0].name : '';
+  const sourceUrl = sources.length ? sources[0].url  : '';
+
   if (currentId) {
     const ind = DATA.indicators.find(i => i.id === currentId);
-    if (ind) Object.assign(ind, {name,currency,category,frequency,unit,refLevel,chartType,source,sourceUrl,intervalDays,pubDay});
+    if (ind) Object.assign(ind, {name,currency,category,frequency,unit,refLevel,chartType,sources,source,sourceUrl,intervalDays,pubDay});
   } else {
-    const newInd = {id:uid(), currency, name, category, frequency, unit, refLevel, chartType, source, sourceUrl, intervalDays, pubDay, data:[]};
+    const newInd = {id:uid(), currency, name, category, frequency, unit, refLevel, chartType, sources, source, sourceUrl, intervalDays, pubDay, data:[]};
     DATA.indicators.push(newInd);
     currentId = newInd.id;
   }
@@ -1638,27 +1645,123 @@ function updateNextLabelHint(ind) {
 function updateSourceBar(ind) {
   const bar = document.getElementById('source-bar');
   const cnt = document.getElementById('source-link-content');
-  if (!ind || (!ind.source && !ind.sourceUrl)) { bar.style.display='none'; return; }
+  if (!ind) { bar.style.display='none'; return; }
+
+  // Multi-sources avec compat descendante
+  let sources = ind.sources;
+  if (!sources || !sources.length) {
+    if (ind.source || ind.sourceUrl) {
+      sources = [{ name: ind.source || '', url: ind.sourceUrl || '' }];
+    } else {
+      bar.style.display='none'; return;
+    }
+  }
+
   bar.style.display='flex';
   const SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\"/></svg>';
-  if (ind.sourceUrl) {
-    const label = ind.source || ind.sourceUrl;
-    cnt.innerHTML = '<a class="source-link-btn" href="'+ind.sourceUrl+'" target="_blank" rel="noopener">'+SVG+' Ouvrir '+label+'</a>';
+
+  const parts = sources.map(s => {
+    const url = s.url || '';
+    const name = s.name || url;
+    if (!name) return '';
+    if (url) {
+      const href = url.startsWith('http') ? url : 'https://' + url;
+      return '<a class="source-link-btn" href="'+href+'" target="_blank" rel="noopener">'+SVG+' '+escHtml(name)+'</a>';
+    }
+    const q = encodeURIComponent(name + ' ' + (ind.name || '') + ' data');
+    return '<a class="source-link-btn" href="https://www.google.com/search?q='+q+'" target="_blank" rel="noopener">'+SVG+' '+escHtml(name)+'</a>';
+  }).filter(Boolean);
+
+  if (!parts.length) { bar.style.display='none'; return; }
+  cnt.innerHTML = '<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">'+parts.join('')+'</span>';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  GESTION MULTI-SOURCES
+// ══════════════════════════════════════════════════════════════════
+
+/* Rendu des lignes de sources dans le formulaire */
+function renderSourceRows(sources) {
+  const list = document.getElementById('sources-list');
+  list.innerHTML = '';
+  if (!sources || !sources.length) {
+    // Toujours afficher au moins une ligne vide
+    _appendSourceRow(list, { name: '', url: '' }, 0);
     return;
   }
-  const isUrl = /^https?:\/\//i.test(ind.source)||/^www\./i.test(ind.source);
-  if (isUrl) {
-    const href = ind.source.startsWith('http') ? ind.source : 'https://'+ind.source;
-    cnt.innerHTML = '<a class="source-link-btn" href="'+href+'" target="_blank" rel="noopener">'+SVG+' Ouvrir '+ind.source+'</a>';
-    return;
+  sources.forEach((s, i) => _appendSourceRow(list, s, i));
+}
+
+function _appendSourceRow(container, src, idx) {
+  const SVG = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+  const row = document.createElement('div');
+  row.className = 'source-row';
+  row.dataset.idx = idx;
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;';
+  row.innerHTML = `
+    <span style="font-family:\'Space Mono\',monospace;font-size:8px;color:var(--muted);width:14px;text-align:right;flex-shrink:0">${idx + 1}</span>
+    <input type="text" class="src-name" placeholder="Nom court (ex: BLS)" value="${escHtml(src.name)}"
+      style="width:110px;flex-shrink:0;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:11px;color:var(--text);font-family:\'DM Sans\',sans-serif;outline:none;transition:border-color .15s;"
+      onfocus="this.style.borderColor=\'var(--c-inflation)\'" onblur="this.style.borderColor=\'var(--border)\'">
+    <input type="url" class="src-url" placeholder="https://…" value="${escHtml(src.url)}"
+      style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:11px;color:var(--text);font-family:\'DM Sans\',sans-serif;outline:none;transition:border-color .15s;"
+      onfocus="this.style.borderColor=\'var(--c-inflation)\'" onblur="this.style.borderColor=\'var(--border)\'">
+    <button type="button" title="Tester le lien" onclick="testSourceRowUrl(this)"
+      style="flex-shrink:0;padding:6px 9px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid var(--border);background:var(--s2);color:var(--muted);font-family:\'DM Sans\',sans-serif;transition:all .15s;"
+      onmouseover="this.style.borderColor=\'var(--c-inflation)\';this.style.color=\'var(--c-inflation)\'"
+      onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">${SVG}</button>
+    <button type="button" title="Supprimer cette source" onclick="removeSourceRow(this)"
+      style="flex-shrink:0;padding:6px 9px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:\'DM Sans\',sans-serif;transition:all .15s;"
+      onmouseover="this.style.borderColor=\'var(--c-neg)\';this.style.color=\'var(--c-neg)\'"
+      onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+function addSourceRow() {
+  const list = document.getElementById('sources-list');
+  const idx = list.querySelectorAll('.source-row').length;
+  _appendSourceRow(list, { name: '', url: '' }, idx);
+  list.lastElementChild.querySelector('.src-name')?.focus();
+}
+
+function removeSourceRow(btn) {
+  const row = btn.closest('.source-row');
+  const list = document.getElementById('sources-list');
+  row.remove();
+  // Renuméroter
+  list.querySelectorAll('.source-row').forEach((r, i) => {
+    r.dataset.idx = i;
+    const numEl = r.querySelector('span');
+    if (numEl) numEl.textContent = i + 1;
+  });
+  // Toujours garder au moins 1 ligne
+  if (!list.querySelectorAll('.source-row').length) {
+    _appendSourceRow(list, { name: '', url: '' }, 0);
   }
-  const q = encodeURIComponent(ind.source+' '+ind.name+' data');
-  cnt.innerHTML = '<a class="source-link-btn" href="https://www.google.com/search?q='+q+'" target="_blank" rel="noopener">'+SVG+' Rechercher "'+ind.source+'"</a>'
-    +'<span class="source-no-link"> — ajoutez une URL dans ⚙️ Paramètres pour un lien direct</span>';
+}
+
+function testSourceRowUrl(btn) {
+  const row = btn.closest('.source-row');
+  const url = row.querySelector('.src-url')?.value.trim();
+  if (!url) { alert("Entrez d'abord une URL."); return; }
+  window.open(url.startsWith('http') ? url : 'https://' + url, '_blank', 'noopener');
+}
+
+/* Collecte toutes les sources depuis les lignes du formulaire */
+function collectSources() {
+  const rows = document.querySelectorAll('#sources-list .source-row');
+  const result = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.src-name')?.value.trim() || '';
+    const url  = row.querySelector('.src-url')?.value.trim()  || '';
+    if (name || url) result.push({ name, url });
+  });
+  return result;
 }
 
 function testSourceUrl() {
-  const url = document.getElementById('inp-source-url').value.trim();
+  const url = document.getElementById('inp-source-url')?.value?.trim();
   if (!url) { alert("Entrez d'abord une URL."); return; }
   window.open(url.startsWith('http') ? url : 'https://'+url, '_blank', 'noopener');
 }
