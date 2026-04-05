@@ -396,18 +396,18 @@ header{
   <span class="filter-label">Devise</span>
   <div class="filter-group" id="filter-currencies">
     <button class="fbtn fbtn-all active" data-f="country" data-v="all" onclick="filtToggle(this)">Tous</button>
-    <button class="fbtn" data-f="country" data-v="usd" onclick="filtToggle(this)">🇺🇸 USD</button>
-    <button class="fbtn" data-f="country" data-v="cad" onclick="filtToggle(this)">🇨🇦 CAD</button>
-    <button class="fbtn" data-f="country" data-v="eur" onclick="filtToggle(this)">🇪🇺 EUR</button>
-    <button class="fbtn" data-f="country" data-v="gbp" onclick="filtToggle(this)">🇬🇧 GBP</button>
-    <button class="fbtn" data-f="country" data-v="chf" onclick="filtToggle(this)">🇨🇭 CHF</button>
-    <button class="fbtn" data-f="country" data-v="jpy" onclick="filtToggle(this)">🇯🇵 JPY</button>
-    <button class="fbtn" data-f="country" data-v="aud" onclick="filtToggle(this)">🇦🇺 AUD</button>
-    <button class="fbtn" data-f="country" data-v="nzd" onclick="filtToggle(this)">🇳🇿 NZD</button>
+    <button class="fbtn" data-f="country" data-v="usd" onclick="filtToggle(this)">USD</button>
+    <button class="fbtn" data-f="country" data-v="cad" onclick="filtToggle(this)">CAD</button>
+    <button class="fbtn" data-f="country" data-v="eur" onclick="filtToggle(this)">EUR</button>
+    <button class="fbtn" data-f="country" data-v="gbp" onclick="filtToggle(this)">GBP</button>
+    <button class="fbtn" data-f="country" data-v="chf" onclick="filtToggle(this)">CHF</button>
+    <button class="fbtn" data-f="country" data-v="jpy" onclick="filtToggle(this)">JPY</button>
+    <button class="fbtn" data-f="country" data-v="aud" onclick="filtToggle(this)">AUD</button>
+    <button class="fbtn" data-f="country" data-v="nzd" onclick="filtToggle(this)">NZD</button>
   </div>
 
   <div class="filter-sep"></div>
-  <span class="filter-label">Catégorie</span>
+
   <div class="filter-group" id="filter-cats">
     <button class="fbtn fbtn-all active" data-f="cat" data-v="all-cat" onclick="filtCatToggle(this)">Toutes</button>
     <button class="fbtn" data-f="cat" data-v="inflation" onclick="filtCatToggle(this)">📈 Inflation</button>
@@ -421,9 +421,9 @@ header{
   <div id="user-badge" style="display:none">
     <span id="user-badge-icon">👤</span>
     <span id="user-badge-name">—</span>
-    <span id="user-badge-role"></span>
+
   </div>
-  <button id="logout-btn" onclick="doLogout()" style="display:none">⏻ Déconnecter</button>
+  <button id="logout-btn" onclick="doLogout()" style="display:none">⏻</button>
 </header>
 
 <!-- ── MODAL ── -->
@@ -623,7 +623,7 @@ header{
 //  AUTHENTIFICATION
 // ══════════════════════════════════════════════════════════════════
 const ACCOUNTS = {
-  'Admin': { password: '77', role: 'admin', icon: '👑', label: 'Administrateur', badge: 'ADMIN' },
+  'Admin': { password: '77', role: 'admin', icon: '👑', label: 'ADMIN', badge: 'ADMIN' },
   'SMF':   { password: 'smf',   role: 'smf',   icon: '📊', label: 'SMF — Lecture seule', badge: 'SMF' },
 };
 
@@ -663,7 +663,7 @@ function doLogin() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('user-badge-icon').textContent = account.icon;
   document.getElementById('user-badge-name').textContent = username;
-  document.getElementById('user-badge-role').textContent = account.label;
+
   document.getElementById('logout-btn').style.display = 'block';
 
   // Apply role restrictions
