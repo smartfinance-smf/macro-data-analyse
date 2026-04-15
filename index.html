@@ -725,11 +725,19 @@ main{padding:10px 14px 60px;}
               <input type="number" step="0.1" id="inp-reflevel" placeholder="ex: 2 → CPI  50 → PMI">
             </div>
             <div class="field">
-              <label>Type de graphique</label>
+              <label>Type de graphique — Réel</label>
               <select id="inp-charttype">
                 <option value="line">Ligne</option>
                 <option value="bar">Barres</option>
                 <option value="stepped">Escalier (taux)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Type de graphique — Attente</label>
+              <select id="inp-charttypeexp">
+                <option value="line">Ligne pointillée</option>
+                <option value="bar">Barres (transparentes)</option>
+                <option value="stepped">Escalier pointillé</option>
               </select>
             </div>
             <div class="field full">
@@ -1278,8 +1286,6 @@ function fmtSources(sources) {
 }
 function getCat(cat) { return CATS[cat] || CATS.autres; }
 
-function getCat(cat) { return CATS[cat] || CATS.autres; }
-
 // ══════════════════════════════════════════════════════════════════
 //  FIREBASE
 // ══════════════════════════════════════════════════════════════════
@@ -1328,11 +1334,22 @@ async function saveToFirebase(now) {
   setSyncStatus('saving');
   try {
     now = now || new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    await DOC_REF.set({ indicators: DATA.indicators, _lastUpdate: now, _version: STORAGE_KEY });
+    // Firestore a une limite de 1MB par document — on chunk si nécessaire
+    const payload = { indicators: DATA.indicators, _lastUpdate: now, _version: STORAGE_KEY };
+    await DOC_REF.set(payload);
     setSyncStatus('saved');
+    return true;
   } catch(e) {
     console.error('Firebase save error:', e);
-    setSyncStatus('error');
+    // Afficher le message d'erreur précis dans la barre de statut
+    const msg = e.code === 'permission-denied'
+      ? '✕ ACCÈS REFUSÉ — Vérifier les règles Firestore'
+      : e.code === 'unavailable'
+      ? '✕ FIREBASE HORS LIGNE'
+      : `✕ ERREUR : ${e.code || e.message}`;
+    const el = document.getElementById('sync-status');
+    if (el) { el.textContent = msg; el.style.color = 'var(--neg)'; }
+    return false;
   }
 }
 
@@ -1342,7 +1359,6 @@ async function loadFromFirebase() {
     const doc = await DOC_REF.get();
     if (doc.exists) {
       const remote = doc.data();
-      // Merge: keep remote data but add any new DEFAULT indicators missing
       const remoteInds = remote.indicators || [];
       const remoteIds = new Set(remoteInds.map(i => i.id));
       const missing = DEFAULT_DATA.indicators.filter(i => !remoteIds.has(i.id));
@@ -1352,23 +1368,42 @@ async function loadFromFirebase() {
         localStorage.setItem(STORAGE_KEY + '_upd', upd);
         document.getElementById('last-update').textContent = upd;
       }
-      // If remote has missing indicators, save back
       if (missing.length) saveToFirebase(upd);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
     } else {
-      // First time → push DEFAULT_DATA to Firebase
-      await saveToFirebase();
+      // Première connexion → pousser les données par défaut
+      const ok = await saveToFirebase();
+      if (!ok) {
+        // Si l'écriture échoue, afficher un message d'aide
+        showFirebaseHelp();
+      }
     }
     setSyncStatus('idle');
     buildTable();
     setTimeout(checkAndShowReminder, 800);
   } catch(e) {
     console.error('Firebase load error:', e);
-    setSyncStatus('offline');
-    // Fallback to localStorage
+    if (e.code === 'permission-denied') {
+      showFirebaseHelp();
+    } else {
+      setSyncStatus('offline');
+    }
     buildTable();
     setTimeout(checkAndShowReminder, 800);
   }
+}
+
+function showFirebaseHelp() {
+  const el = document.getElementById('sync-status');
+  if (el) {
+    el.innerHTML = '✕ RÈGLES FIRESTORE — <span style="color:var(--amber);cursor:pointer;text-decoration:underline;" onclick="showFirebaseRulesModal()">COMMENT CORRIGER ?</span>';
+    el.style.color = 'var(--neg)';
+  }
+}
+
+function showFirebaseRulesModal() {
+  const msg = `Pour autoriser les écritures Firebase :\n\n1. Va sur console.firebase.google.com\n2. Sélectionne ton projet : smf-room-03-macro-data-analyse\n3. Firestore Database → Règles\n4. Remplace tout par :\n\nrules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}\n\n5. Clique "Publier"\n6. Recharge la page`;
+  alert(msg);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1433,10 +1468,24 @@ function makeSVGChart(ind, W=290, H=136) {
       const barCol = v >= 0 ? col : '#ff4069';
       svg += `<rect x="${x.toFixed(1)}" y="${barY.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="${barCol}" opacity=".8" rx="1.5"/>`;
     });
-    // Expected line on bars
+    // Expected sur barres — même logique que chartTypeExp
     if (hasExp) {
-      const ePts = exps.map((v,i) => v !== null ? `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}` : null).filter(Boolean).join(' ');
-      if (ePts) svg += `<polyline points="${ePts}" fill="none" stroke="#5a7090" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round"/>`;
+      const expType = ind.chartTypeExp || 'line';
+      if (expType === 'bar') {
+        const bw2 = Math.max(3, cw / last12.length * 0.65);
+        exps.forEach((v, i) => {
+          if (v === null || v === undefined) return;
+          const x = xOf(i) - bw2/2;
+          const zero = yOf(Math.max(0, min));
+          const yy = yOf(v);
+          const bh = Math.abs(zero - yy);
+          const barY = v >= 0 ? yy : zero;
+          svg += `<rect x="${x.toFixed(1)}" y="${barY.toFixed(1)}" width="${bw2.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="none" stroke="#5a7090" stroke-width="1.2" stroke-dasharray="3,2" rx="1.5"/>`;
+        });
+      } else {
+        const ePts = exps.map((v,i) => v !== null ? `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}` : null).filter(Boolean).join(' ');
+        if (ePts) svg += `<polyline points="${ePts}" fill="none" stroke="#5a7090" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round"/>`;
+      }
     }
   } else {
     // FILL
@@ -1469,15 +1518,40 @@ function makeSVGChart(ind, W=290, H=136) {
       svg += `<path d="${pathD}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
     }
 
-    // Expected dashed line
+    // Expected — rendu selon chartTypeExp
     if (hasExp) {
-      let ed = '';
-      exps.forEach((v, i) => {
-        if (v === null) return;
-        const x = xOf(i).toFixed(1), y = yOf(v).toFixed(1);
-        ed += ed ? ` L${x},${y}` : `M${x},${y}`;
-      });
-      if (ed) svg += `<path d="${ed}" fill="none" stroke="#5a7090" stroke-width="1.4" stroke-dasharray="4,3" stroke-linecap="round"/>`;
+      const expType = ind.chartTypeExp || 'line';
+      if (expType === 'bar') {
+        // Barres transparentes avec bordure pointillée
+        const bw = Math.max(3, cw / last12.length * 0.65);
+        exps.forEach((v, i) => {
+          if (v === null || v === undefined) return;
+          const x = xOf(i) - bw/2;
+          const zero = yOf(Math.max(0, min));
+          const yy = yOf(v);
+          const bh = Math.abs(zero - yy);
+          const barY = v >= 0 ? yy : zero;
+          svg += `<rect x="${x.toFixed(1)}" y="${barY.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="none" stroke="#5a7090" stroke-width="1.2" stroke-dasharray="3,2" rx="1.5"/>`;
+        });
+      } else if (expType === 'stepped') {
+        let ed = '';
+        exps.forEach((v, i) => {
+          if (v === null) return;
+          const x = xOf(i).toFixed(1), y = yOf(v).toFixed(1);
+          if (!ed) ed = `M${x},${y}`;
+          else { const px = xOf(i).toFixed(1); ed += ` H${px} V${y}`; }
+        });
+        if (ed) svg += `<path d="${ed}" fill="none" stroke="#5a7090" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round"/>`;
+      } else {
+        // Ligne pointillée (défaut)
+        let ed = '';
+        exps.forEach((v, i) => {
+          if (v === null) return;
+          const x = xOf(i).toFixed(1), y = yOf(v).toFixed(1);
+          ed += ed ? ` L${x},${y}` : `M${x},${y}`;
+        });
+        if (ed) svg += `<path d="${ed}" fill="none" stroke="#5a7090" stroke-width="1.4" stroke-dasharray="4,3" stroke-linecap="round"/>`;
+      }
     }
   }
 
@@ -1733,7 +1807,7 @@ function switchTab(tab) {
 
 // ── FORM ──
 function clearForm() {
-  ['inp-currency','inp-name','inp-category','inp-frequency','inp-interval','inp-pubday','inp-unit','inp-reflevel','inp-charttype'].forEach(id => {
+  ['inp-currency','inp-name','inp-category','inp-frequency','inp-interval','inp-pubday','inp-unit','inp-reflevel','inp-charttype','inp-charttypeexp'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
@@ -1754,6 +1828,7 @@ function fillForm(ind) {
   set('inp-unit', ind.unit || '');
   set('inp-reflevel', ind.refLevel ?? '');
   set('inp-charttype', ind.chartType || 'line');
+  set('inp-charttypeexp', ind.chartTypeExp || 'line');
 
   // Sources
   const sl = document.getElementById('sources-list');
@@ -1789,6 +1864,7 @@ function saveParams() {
     unit: document.getElementById('inp-unit').value.trim(),
     refLevel: document.getElementById('inp-reflevel').value !== '' ? parseFloat(document.getElementById('inp-reflevel').value) : null,
     chartType: document.getElementById('inp-charttype').value,
+    chartTypeExp: document.getElementById('inp-charttypeexp').value,
     sources,
   };
 
