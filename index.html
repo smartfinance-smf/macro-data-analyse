@@ -564,6 +564,182 @@ main{padding:10px 14px 60px;}
   .batch-body{grid-template-columns:1fr;}
   .batch-preview-pane{display:none;}
 }
+
+/* ══════════════════════════════════════════════════════════
+   NAV TABS (Dashboard / Calendrier)
+══════════════════════════════════════════════════════════ */
+.nav-tabs{display:flex;align-items:stretch;gap:0;margin-left:6px;}
+.nav-tab{
+  padding:0 16px;height:100%;border:none;background:transparent;
+  font-family:var(--font-mono);font-size:9px;font-weight:700;
+  letter-spacing:.14em;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;
+  display:flex;align-items:center;gap:5px;
+}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--amber);border-bottom-color:var(--amber);}
+.nav-tab .nav-icon{font-size:11px;}
+
+/* ══════════════════════════════════════════════════════════
+   CALENDAR PAGE
+══════════════════════════════════════════════════════════ */
+#cal-page{display:none;padding:10px 14px 60px;}
+#cal-page.visible{display:block;}
+
+.cal-toolbar{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;
+}
+.cal-title{
+  font-family:var(--font-mono);font-size:11px;font-weight:700;
+  color:var(--amber);letter-spacing:.14em;
+}
+.cal-count{
+  font-size:8px;font-family:var(--font-mono);color:var(--muted);
+  padding:2px 8px;border:1px solid var(--border);
+}
+.cal-filters{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
+
+.cal-section{margin-bottom:24px;}
+.cal-section-header{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:8px;font-weight:700;
+  letter-spacing:.18em;color:var(--muted);text-transform:uppercase;
+  padding:6px 0;margin-bottom:4px;
+  border-bottom:1px solid var(--border);
+}
+.cal-section-header .cal-sec-dot{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;
+}
+
+.cal-table{width:100%;border-collapse:collapse;}
+.cal-table th{
+  font-family:var(--font-mono);font-size:7px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  padding:5px 10px;text-align:left;border-bottom:1px solid var(--border);
+  white-space:nowrap;background:var(--bg2);
+}
+.cal-table th.right{text-align:right;}
+.cal-table td{
+  padding:6px 10px;border-bottom:1px solid rgba(26,32,48,.5);
+  font-family:var(--font-mono);font-size:10px;vertical-align:middle;
+}
+.cal-table tr:hover td{background:rgba(255,176,32,.03);}
+.cal-table tr:last-child td{border-bottom:none;}
+
+.cal-flag{font-size:13px;}
+.cal-cur{
+  font-size:8px;font-weight:700;letter-spacing:.1em;
+  padding:1px 5px;
+}
+.cal-name{font-size:10px;font-weight:600;color:var(--text);}
+.cal-sub{font-size:7px;color:var(--muted);margin-top:1px;font-family:var(--font-mono);}
+.cal-cat{
+  font-size:7px;font-weight:700;letter-spacing:.08em;
+  padding:2px 6px;border:1px solid transparent;font-family:var(--font-mono);
+  white-space:nowrap;
+}
+.cal-date{font-size:9px;color:var(--muted);}
+.cal-val{font-size:11px;font-weight:700;font-family:var(--font-mono);}
+.cal-val.pos{color:var(--pos);}
+.cal-val.neg{color:var(--neg);}
+.cal-val.neutral{color:var(--text);}
+.cal-exp{font-size:9px;color:var(--muted);font-family:var(--font-mono);}
+.cal-prev{font-size:9px;color:var(--muted);font-family:var(--font-mono);}
+
+.cal-next-date{
+  font-size:9px;font-weight:700;font-family:var(--font-mono);
+  color:var(--sky);
+}
+.cal-next-date.overdue{color:var(--neg);}
+.cal-next-date.soon{color:var(--amber);}
+.cal-next-date.future{color:var(--muted);}
+
+.cal-days-badge{
+  display:inline-block;font-size:7px;font-weight:700;
+  padding:1px 5px;font-family:var(--font-mono);letter-spacing:.06em;
+  margin-top:2px;
+}
+.cal-days-badge.overdue{background:rgba(255,64,105,.12);color:var(--neg);border:1px solid rgba(255,64,105,.25);}
+.cal-days-badge.soon{background:rgba(255,176,32,.1);color:var(--amber);border:1px solid rgba(255,176,32,.2);}
+.cal-days-badge.future{background:rgba(26,32,48,.8);color:var(--muted);border:1px solid var(--border);}
+
+.cal-surprise{
+  font-size:8px;font-weight:700;
+  padding:1px 5px;font-family:var(--font-mono);
+}
+.cal-surprise.pos{background:rgba(46,204,138,.1);color:var(--pos);}
+.cal-surprise.neg{background:rgba(255,64,105,.1);color:var(--neg);}
+
+.cal-freq{
+  font-size:7px;color:var(--muted);font-family:var(--font-mono);
+  padding:1px 5px;border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+.cal-no-data{
+  text-align:center;padding:40px 20px;font-family:var(--font-mono);
+  font-size:9px;color:var(--muted);letter-spacing:.1em;
+}
+
+/* ══════════════════════════════════════════════════════════
+   STRUCTURED DATA INPUT (remplace textarea)
+══════════════════════════════════════════════════════════ */
+.data-input-header{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:10px;
+}
+.data-mode-btn{
+  padding:4px 12px;font-size:8px;font-weight:700;letter-spacing:.08em;
+  font-family:var(--font-mono);cursor:pointer;transition:all .15s;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+}
+.data-mode-btn.active{
+  background:rgba(255,176,32,.1);border-color:var(--amber);color:var(--amber);
+}
+
+/* Table input */
+.data-table-wrap{overflow:auto;max-height:280px;border:1px solid var(--border);}
+.data-itbl{width:100%;border-collapse:collapse;}
+.data-itbl th{
+  font-family:var(--font-mono);font-size:7px;font-weight:700;
+  letter-spacing:.14em;color:var(--muted);padding:5px 8px;
+  text-align:left;background:var(--bg3);border-bottom:1px solid var(--border);
+  white-space:nowrap;position:sticky;top:0;z-index:2;
+}
+.data-itbl td{
+  padding:2px 4px;border-bottom:1px solid rgba(26,32,48,.4);
+  vertical-align:middle;
+}
+.data-itbl tr:last-child td{border-bottom:none;}
+.data-itbl tr:hover td{background:rgba(255,176,32,.02);}
+.dinput{
+  width:100%;background:transparent;border:none;
+  padding:5px 6px;font-size:11px;color:var(--text);
+  font-family:var(--font-mono);outline:none;
+  caret-color:var(--amber);transition:background .12s;
+}
+.dinput:focus{background:rgba(255,176,32,.05);}
+.dinput.date-inp{width:100px;color:var(--sky);}
+.dinput.val-inp{width:80px;text-align:right;}
+.dinput.exp-inp{width:80px;text-align:right;color:var(--muted);}
+.drow-del{
+  background:transparent;border:none;color:var(--muted);
+  cursor:pointer;padding:4px 7px;font-size:10px;
+  font-family:var(--font-mono);transition:all .15s;
+}
+.drow-del:hover{color:var(--neg);}
+.data-add-row{
+  width:100%;padding:6px;background:rgba(0,201,167,.05);
+  border:none;border-top:1px dashed rgba(0,201,167,.2);
+  color:var(--teal);font-size:8px;font-weight:700;
+  font-family:var(--font-mono);cursor:pointer;letter-spacing:.1em;
+  transition:all .15s;
+}
+.data-add-row:hover{background:rgba(0,201,167,.1);}
+.drow-surp{
+  font-size:8px;font-weight:700;font-family:var(--font-mono);
+  padding:1px 4px;
+}
 </style>
 </head>
 <body>
@@ -601,6 +777,16 @@ main{padding:10px 14px 60px;}
     <span class="brand-dot"></span>
     MACRO TERMINAL
     <span class="header-badge">FX MACRO</span>
+  </div>
+
+  <!-- Page nav tabs -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="nav-dashboard" onclick="switchPage('dashboard')">
+      <span class="nav-icon">📊</span>DASH
+    </button>
+    <button class="nav-tab" id="nav-calendar" onclick="switchPage('calendar')">
+      <span class="nav-icon">📅</span>CALENDRIER
+    </button>
   </div>
 
   <div class="h-sep"></div>
@@ -700,23 +886,6 @@ main{padding:10px 14px 60px;}
               </select>
             </div>
             <div class="field">
-              <label>Délai rappel (jours)</label>
-              <input type="number" min="1" max="365" id="inp-interval" placeholder="ex: 30 / 7 / 90">
-            </div>
-            <div class="field">
-              <label>Jour de publication habituel</label>
-              <select id="inp-pubday">
-                <option value="">— Aucun —</option>
-                <option value="0">Dimanche</option>
-                <option value="1">Lundi</option>
-                <option value="2">Mardi</option>
-                <option value="3">Mercredi</option>
-                <option value="4">Jeudi</option>
-                <option value="5">Vendredi</option>
-                <option value="6">Samedi</option>
-              </select>
-            </div>
-            <div class="field">
               <label>Unité d'affichage</label>
               <input type="text" id="inp-unit" placeholder="ex: % · K · index · pts">
             </div>
@@ -758,39 +927,80 @@ main{padding:10px 14px 60px;}
       <!-- DATA -->
       <div class="tab-pane" id="pane-data">
 
-        <!-- Format hint bar -->
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:rgba(255,176,32,.04);border:1px solid rgba(255,176,32,.12);margin-bottom:10px;font-family:var(--font-mono);font-size:8px;color:var(--muted);">
-          <span style="color:var(--amber);font-weight:700;">FORMAT</span>
-          <span>Tableau copié (Date / Actual / Forecast) <span style="opacity:.5">·</span> ou ligne par ligne : <code style="color:var(--teal);">Mar 26  2.4%  2.3%</code></span>
-          <button onclick="loadIndTemplate()" style="margin-left:auto;padding:3px 10px;border:1px solid rgba(0,201,167,.35);background:rgba(0,201,167,.07);color:var(--teal);font-size:7px;font-weight:700;cursor:pointer;font-family:var(--font-mono);letter-spacing:.08em;transition:all .15s;">⬇ EXPORTER DONNÉES</button>
+        <!-- ── PROCHAINE PUBLICATION ── -->
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(100,160,255,.06);border:1px solid rgba(100,160,255,.2);margin-bottom:10px;">
+          <span style="font-family:var(--font-mono);font-size:8px;font-weight:700;letter-spacing:.14em;color:#64a0ff;white-space:nowrap;">📅 PROCHAINE PUBLICATION</span>
+          <input
+            id="inp-next-date"
+            type="date"
+            style="background:var(--bg);border:1px solid rgba(100,160,255,.35);padding:4px 10px;font-size:11px;font-weight:700;color:#64a0ff;font-family:var(--font-mono);outline:none;transition:border-color .15s;cursor:pointer;"
+            onfocus="this.style.borderColor='#64a0ff'"
+            onblur="this.style.borderColor='rgba(100,160,255,.35)'"
+            title="Date exacte de la prochaine release (utilisée par le calendrier)"
+          />
+          <span style="font-size:8px;color:var(--muted);font-family:var(--font-mono);">← date exacte pour le calendrier</span>
+          <button onclick="document.getElementById('inp-next-date').value=''" style="margin-left:auto;padding:2px 8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:8px;font-family:var(--font-mono);cursor:pointer;">✕ EFFACER</button>
         </div>
 
-        <!-- Two-column layout: textarea left, live preview right -->
-        <div style="display:grid;grid-template-columns:1fr 200px;gap:10px;min-height:260px;">
+        <!-- Header bar -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div class="data-input-header" style="margin-bottom:0;flex:1;">
+            <button class="data-mode-btn active" id="mode-btn-table" onclick="switchDataMode('table')">📋 TABLEAU</button>
+            <button class="data-mode-btn" id="mode-btn-paste" onclick="switchDataMode('paste')">📝 COLLER TEXTE</button>
+          </div>
+          <button onclick="loadIndData()" style="padding:3px 10px;border:1px solid rgba(0,201,167,.35);background:rgba(0,201,167,.07);color:var(--teal);font-size:7px;font-weight:700;cursor:pointer;font-family:var(--font-mono);letter-spacing:.08em;transition:all .15s;">⬇ CHARGER DONNÉES</button>
+        </div>
 
-          <!-- Textarea -->
-          <div style="display:flex;flex-direction:column;gap:6px;">
+        <!-- MODE TABLE -->
+        <div id="mode-table">
+          <div class="data-table-wrap">
+            <table class="data-itbl">
+              <thead>
+                <tr>
+                  <th style="width:24px;">#</th>
+                  <th>📅 DATE (ex: Mar 26)</th>
+                  <th style="text-align:right;">✅ RÉEL</th>
+                  <th style="text-align:right;">🎯 ATTENDU</th>
+                  <th style="width:50px;text-align:center;">SURP.</th>
+                  <th style="width:30px;"></th>
+                </tr>
+              </thead>
+              <tbody id="data-rows-body">
+              </tbody>
+            </table>
+            <button class="data-add-row" onclick="addDataRow()">＋ AJOUTER UNE LIGNE</button>
+          </div>
+          <div style="font-size:7px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.06em;margin-top:6px;">
+            Tab pour naviguer entre cellules · Les données sont triées automatiquement par date
+          </div>
+        </div>
+
+        <!-- MODE PASTE -->
+        <div id="mode-paste" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:rgba(255,176,32,.04);border:1px solid rgba(255,176,32,.12);margin-bottom:10px;font-family:var(--font-mono);font-size:8px;color:var(--muted);">
+            <span style="color:var(--amber);font-weight:700;">FORMAT</span>
+            <span>Date / Réel / Attendu : <code style="color:var(--teal);">Apr 10, 2026  3.3%  3.4%</code> · ou <code style="color:var(--teal);">Mar 26  2.4%  2.3%</code></span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 200px;gap:10px;min-height:240px;">
             <textarea id="data-textarea"
               style="flex:1;min-height:240px;background:var(--bg);border:1px solid var(--border);padding:12px;font-size:12px;color:var(--text);font-family:var(--font-mono);outline:none;resize:vertical;line-height:1.9;caret-color:var(--amber);tab-size:4;transition:border-color .15s;"
-              placeholder="Collez directement sans entête :&#10;&#10; Apr 10, 2026	3.3%	3.4%	2.4%&#10; Mar 11, 2026	2.4%	2.4%	2.4%&#10; Feb 13, 2026	2.4%	2.5%	2.7%&#10;&#10;Colonnes : Date · Réel · Attente · Précédent (ignoré)&#10;&#10;— ou format court —&#10;&#10;Avr 26  3.3%  3.4%&#10;Mar 26  2.4%  2.4%"
+              placeholder="Collez directement sans entête :&#10;&#10; Apr 10, 2026&#9;3.3%&#9;3.4%&#9;2.4%&#10; Mar 11, 2026&#9;2.4%&#9;2.4%&#9;2.4%&#10;&#10;Colonnes : Date · Réel · Attente · Précédent (ignoré)"
               oninput="previewDataText()"
               onfocus="this.style.borderColor='var(--amber)'"
               onblur="this.style.borderColor='var(--border)'"
               onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();saveData();}">
             </textarea>
-            <div style="font-size:7px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.06em;">
-              Ctrl+Enter pour sauvegarder · Les données existantes seront <span style="color:var(--amber)">remplacées</span>
+            <div style="background:var(--bg3);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+              <div style="padding:6px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:7px;font-weight:700;letter-spacing:.14em;color:var(--muted);display:flex;justify-content:space-between;">
+                APERÇU <span id="data-preview-count" style="color:var(--amber);">—</span>
+              </div>
+              <div id="data-preview-list" style="flex:1;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-family:var(--font-mono);font-size:9px;">
+                <div style="color:var(--muted);padding:16px 0;text-align:center;font-size:8px;line-height:1.8;">Collez des données<br>pour voir l'aperçu</div>
+              </div>
             </div>
           </div>
-
-          <!-- Live preview panel -->
-          <div style="background:var(--bg3);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
-            <div style="padding:6px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:7px;font-weight:700;letter-spacing:.14em;color:var(--muted);display:flex;justify-content:space-between;">
-              APERÇU <span id="data-preview-count" style="color:var(--amber);">—</span>
-            </div>
-            <div id="data-preview-list" style="flex:1;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-family:var(--font-mono);font-size:9px;">
-              <div style="color:var(--muted);padding:16px 0;text-align:center;font-size:8px;line-height:1.8;">Collez des données<br>pour voir l'aperçu</div>
-            </div>
+          <div style="font-size:7px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.06em;margin-top:6px;">
+            Ctrl+Enter pour sauvegarder · Les données existantes seront <span style="color:var(--amber)">remplacées</span>
           </div>
         </div>
 
@@ -879,6 +1089,37 @@ main{padding:10px 14px 60px;}
 </div>
 
 <main id="main-content" style="padding:10px 14px 60px;"></main>
+
+<!-- ══════════════════════════════════════════════════════════
+  CALENDAR PAGE
+══════════════════════════════════════════════════════════ -->
+<div id="cal-page">
+  <div class="cal-toolbar">
+    <span class="cal-title">📅 CALENDRIER ÉCONOMIQUE</span>
+    <span class="cal-count" id="cal-count">— indicateurs</span>
+    <div class="cal-filters">
+      <span class="filter-label" style="font-family:var(--font-mono);font-size:7px;color:var(--muted);letter-spacing:.14em;">CCY</span>
+      <button class="ftag active" data-cf="cur" data-cv="all" onclick="calFilter('cur','all',this)">ALL</button>
+      <button class="ftag" data-cf="cur" data-cv="usd" onclick="calFilter('cur','usd',this)">USD</button>
+      <button class="ftag" data-cf="cur" data-cv="eur" onclick="calFilter('cur','eur',this)">EUR</button>
+      <button class="ftag" data-cf="cur" data-cv="gbp" onclick="calFilter('cur','gbp',this)">GBP</button>
+      <button class="ftag" data-cf="cur" data-cv="jpy" onclick="calFilter('cur','jpy',this)">JPY</button>
+      <button class="ftag" data-cf="cur" data-cv="chf" onclick="calFilter('cur','chf',this)">CHF</button>
+      <button class="ftag" data-cf="cur" data-cv="cad" onclick="calFilter('cur','cad',this)">CAD</button>
+      <button class="ftag" data-cf="cur" data-cv="aud" onclick="calFilter('cur','aud',this)">AUD</button>
+      <button class="ftag" data-cf="cur" data-cv="nzd" onclick="calFilter('cur','nzd',this)">NZD</button>
+    </div>
+    <div class="cal-filters" style="margin-left:0;">
+      <span class="filter-label" style="font-family:var(--font-mono);font-size:7px;color:var(--muted);letter-spacing:.14em;">CAT</span>
+      <button class="ftag active" data-cf="cat" data-cv="all" onclick="calFilter('cat','all',this)">TOUT</button>
+      <button class="ftag" data-cf="cat" data-cv="inflation" onclick="calFilter('cat','inflation',this)">INF</button>
+      <button class="ftag" data-cf="cat" data-cv="emplois" onclick="calFilter('cat','emplois',this)">EMP</button>
+      <button class="ftag" data-cf="cat" data-cv="croissance" onclick="calFilter('cat','croissance',this)">GRO</button>
+      <button class="ftag" data-cf="cat" data-cv="taux" onclick="calFilter('cat','taux',this)">TAUX</button>
+    </div>
+  </div>
+  <div id="cal-body"></div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════
   STATUS BAR
@@ -1410,157 +1651,221 @@ function showFirebaseRulesModal() {
 //  SVG CHART (full-size for card)
 // ══════════════════════════════════════════════════════════════════
 function makeSVGChart(ind, W=290, H=136) {
-  const last12 = ind.data.slice(-12);
-  const vals = last12.map(d => d.value);
-  const exps = last12.map(d => d.expected ?? null);
-  const hasExp = exps.some(v => v !== null);
-  const unit = ind.unit || '';
-  const col = getCat(ind.category).hex;
+  const last12  = ind.data.slice(-12);
+  if (!last12.length) return null;
+
+  const vals    = last12.map(d => d.value);
+  const exps    = last12.map(d => d.expected ?? null);
+  const hasExp  = exps.some(v => v !== null);
+  const unit    = ind.unit || '';
+  const col     = getCat(ind.category).hex;
+  const colNeg  = '#ff4069';
+  const colExp  = '#5a7090';
+
   const all = [...vals, ...exps.filter(v=>v!==null)];
   if (ind.refLevel != null) all.push(ind.refLevel);
   const validAll = all.filter(v => v !== null && !isNaN(+v));
   if (!validAll.length) return null;
 
-  const pad = {t:8, r:8, b:22, l:34};
-  const cw = W - pad.l - pad.r;
-  const ch = H - pad.t - pad.b;
-  const min = Math.min(...validAll);
-  const max = Math.max(...validAll);
+  const pad = {t:10, r:10, b:24, l:36};
+  const cw  = W - pad.l - pad.r;
+  const ch  = H - pad.t - pad.b;
+  let   min = Math.min(...validAll);
+  let   max = Math.max(...validAll);
+
+  // Add 8% padding to range for breathing room
+  const rng = max - min || 0.01;
+  min -= rng * 0.06;
+  max += rng * 0.06;
   const range = max - min || 0.01;
 
-  function xOf(i) { return pad.l + (i / Math.max(last12.length-1,1)) * cw; }
-  function yOf(v) { return pad.t + ch - ((v - min) / range) * ch; }
+  const xOf = i => pad.l + (i / Math.max(last12.length-1,1)) * cw;
+  const yOf = v => pad.t + ch - ((v - min) / range) * ch;
 
-  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">`;
+  const gid   = 'g' + Math.random().toString(36).slice(2,8);
+  const svgId = 'sv_' + ind.id;
 
-  // Grid lines Y (3 lines)
-  for (let i = 0; i <= 2; i++) {
-    const yy = pad.t + (i / 2) * ch;
-    const val = max - (i / 2) * (max - min);
-    svg += `<line x1="${pad.l}" y1="${yy.toFixed(1)}" x2="${W-pad.r}" y2="${yy.toFixed(1)}" stroke="#1a2030" stroke-width="1"/>`;
-    svg += `<text x="${pad.l - 3}" y="${(yy + 3).toFixed(1)}" font-size="6" fill="#3d5066" text-anchor="end" font-family="IBM Plex Mono">${val.toFixed(val < 10 ? 1 : 0)}</text>`;
+  // Build JSON payload for tooltip (embedded in SVG as data attr)
+  const tipData = JSON.stringify(last12.map((d,i) => ({
+    label: d.label || '',
+    value: d.value,
+    expected: d.expected ?? null,
+    x: Math.round(xOf(i))
+  })));
+
+  let svg = `<svg id="${svgId}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+    style="width:100%;height:100%;cursor:crosshair;overflow:visible"
+    data-unit="${unit}" data-col="${col}"
+    data-pts='${tipData.replace(/'/g,"&apos;")}'
+    onmousemove="svgHover(event,this)" onmouseleave="svgHideTooltip()">`;
+
+  // ── Defs (gradients + glow filter) ──
+  svg += `<defs>
+    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${col}" stop-opacity=".32"/>
+      <stop offset="60%" stop-color="${col}" stop-opacity=".08"/>
+      <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="${gid}n" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${colNeg}" stop-opacity=".0"/>
+      <stop offset="100%" stop-color="${colNeg}" stop-opacity=".28"/>
+    </linearGradient>
+    <filter id="${gid}f" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`;
+
+  // ── Background subtle grid ──
+  for (let i = 0; i <= 3; i++) {
+    const yy  = pad.t + (i / 3) * ch;
+    const val = max - (i / 3) * (max - min);
+    const isZero = Math.abs(val) < range * 0.03;
+    const gridCol = isZero ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.04)';
+    svg += `<line x1="${pad.l}" y1="${yy.toFixed(1)}" x2="${W-pad.r}" y2="${yy.toFixed(1)}"
+      stroke="${gridCol}" stroke-width="${isZero ? 1 : .6}"/>`;
+    svg += `<text x="${(pad.l-4).toFixed(1)}" y="${(yy+3).toFixed(1)}"
+      font-size="6.5" fill="#3d5470" text-anchor="end"
+      font-family="IBM Plex Mono,monospace">${val.toFixed(Math.abs(val)<10?1:0)}</text>`;
   }
 
-  // X axis labels (max 6)
+  // ── X labels (max 6, always show last) ──
   const step = Math.ceil(last12.length / 6);
   last12.forEach((d, i) => {
     if (i % step !== 0 && i !== last12.length-1) return;
-    const x = xOf(i);
-    svg += `<text x="${x.toFixed(1)}" y="${H - 4}" font-size="6" fill="#3d5066" text-anchor="middle" font-family="IBM Plex Mono">${d.label || ''}</text>`;
+    svg += `<text x="${xOf(i).toFixed(1)}" y="${H-5}"
+      font-size="6.5" fill="#3d5470" text-anchor="middle"
+      font-family="IBM Plex Mono,monospace">${d.label||''}</text>`;
   });
 
-  // Reference level
+  // ── Reference level ──
   if (ind.refLevel != null) {
     const ry = yOf(ind.refLevel);
-    svg += `<line x1="${pad.l}" y1="${ry.toFixed(1)}" x2="${W-pad.r}" y2="${ry.toFixed(1)}" stroke="rgba(46,204,138,.25)" stroke-width="1.2" stroke-dasharray="4,3"/>`;
+    svg += `<line x1="${pad.l}" y1="${ry.toFixed(1)}" x2="${W-pad.r}" y2="${ry.toFixed(1)}"
+      stroke="rgba(46,204,138,.3)" stroke-width="1" stroke-dasharray="5,3"/>`;
+    svg += `<text x="${(W-pad.r+2).toFixed(1)}" y="${(ry+3).toFixed(1)}"
+      font-size="5.5" fill="rgba(46,204,138,.5)" font-family="IBM Plex Mono,monospace">${ind.refLevel}</text>`;
   }
 
-  // BARS
+  // ── BARS ──
   if (ind.chartType === 'bar') {
-    const bw = Math.max(3, cw / last12.length * 0.65);
+    const bw = Math.max(4, cw / last12.length * 0.62);
+    const zero = yOf(Math.max(min, 0));
+
+    // Expected overlay (dashed outline bars behind)
+    if (hasExp) {
+      exps.forEach((v, i) => {
+        if (v === null) return;
+        const x  = xOf(i) - bw/2;
+        const yy = yOf(v);
+        const bh = Math.abs(zero - yy);
+        svg += `<rect x="${x.toFixed(1)}" y="${(v>=0?yy:zero).toFixed(1)}"
+          width="${bw.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}"
+          fill="none" stroke="${colExp}" stroke-width="1" stroke-dasharray="2,2" rx="1.5" opacity=".7"/>`;
+      });
+    }
+
+    // Real bars
     vals.forEach((v, i) => {
       if (v === null || v === undefined) return;
-      const x = xOf(i) - bw/2;
-      const zero = yOf(Math.max(0, min));
-      const yy = yOf(v);
-      const bh = Math.abs(zero - yy);
+      const x   = xOf(i) - bw/2;
+      const yy  = yOf(v);
+      const bh  = Math.abs(zero - yy);
       const barY = v >= 0 ? yy : zero;
-      const barCol = v >= 0 ? col : '#ff4069';
-      svg += `<rect x="${x.toFixed(1)}" y="${barY.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="${barCol}" opacity=".8" rx="1.5"/>`;
+      const barCol = v >= 0 ? col : colNeg;
+      svg += `<rect x="${x.toFixed(1)}" y="${barY.toFixed(1)}"
+        width="${bw.toFixed(1)}" height="${Math.max(1.5,bh).toFixed(1)}"
+        fill="${barCol}" opacity=".85" rx="2"/>`;
     });
-    // Expected sur barres — même logique que chartTypeExp
-    if (hasExp) {
-      const expType = ind.chartTypeExp || 'line';
-      if (expType === 'bar') {
-        const bw2 = Math.max(3, cw / last12.length * 0.65);
-        exps.forEach((v, i) => {
-          if (v === null || v === undefined) return;
-          const x = xOf(i) - bw2/2;
-          const zero = yOf(Math.max(0, min));
-          const yy = yOf(v);
-          const bh = Math.abs(zero - yy);
-          const barY = v >= 0 ? yy : zero;
-          svg += `<rect x="${x.toFixed(1)}" y="${barY.toFixed(1)}" width="${bw2.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="none" stroke="#5a7090" stroke-width="1.2" stroke-dasharray="3,2" rx="1.5"/>`;
-        });
-      } else {
-        const ePts = exps.map((v,i) => v !== null ? `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}` : null).filter(Boolean).join(' ');
-        if (ePts) svg += `<polyline points="${ePts}" fill="none" stroke="#5a7090" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round"/>`;
-      }
-    }
+
+    // Dot on top of each bar
+    vals.forEach((v, i) => {
+      if (v === null) return;
+      const barCol = v >= 0 ? col : colNeg;
+      svg += `<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(v).toFixed(1)}"
+        r="2" fill="${barCol}" stroke="var(--bg2,#0d1117)" stroke-width="1.2" opacity=".9"/>`;
+    });
+
   } else {
-    // FILL
-    const gid = 'g' + Math.random().toString(36).slice(2,7);
-    svg += `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity=".22"/><stop offset="100%" stop-color="${col}" stop-opacity=".01"/></linearGradient></defs>`;
+    // ── LINE / STEPPED ──
+    const validPts = vals.map((v,i) => v!==null&&!isNaN(v)?{x:xOf(i),y:yOf(v),v}:null).filter(Boolean);
 
-    // Build main path
-    let pathD = '';
-    const validPts = vals.map((v,i) => v !== null && !isNaN(v) ? {x: xOf(i), y: yOf(v)} : null).filter(Boolean);
     if (validPts.length >= 2) {
+      // Build path
+      let pathD = '';
       if (ind.chartType === 'stepped') {
-        let d = `M${validPts[0].x.toFixed(1)},${validPts[0].y.toFixed(1)}`;
-        for (let i = 1; i < validPts.length; i++) {
-          d += ` H${validPts[i].x.toFixed(1)} V${validPts[i].y.toFixed(1)}`;
+        pathD = `M${validPts[0].x.toFixed(1)},${validPts[0].y.toFixed(1)}`;
+        for (let i=1; i<validPts.length; i++) {
+          pathD += ` H${validPts[i].x.toFixed(1)} V${validPts[i].y.toFixed(1)}`;
         }
-        pathD = d;
       } else {
-        // Smooth bezier
-        let d = `M${validPts[0].x.toFixed(1)},${validPts[0].y.toFixed(1)}`;
-        for (let i = 1; i < validPts.length; i++) {
-          const p = validPts[i-1], c = validPts[i];
-          const cp1x = p.x + (c.x - p.x) * 0.35;
-          const cp2x = c.x - (c.x - p.x) * 0.35;
-          d += ` C${cp1x.toFixed(1)},${p.y.toFixed(1)} ${cp2x.toFixed(1)},${c.y.toFixed(1)} ${c.x.toFixed(1)},${c.y.toFixed(1)}`;
+        pathD = `M${validPts[0].x.toFixed(1)},${validPts[0].y.toFixed(1)}`;
+        for (let i=1; i<validPts.length; i++) {
+          const p=validPts[i-1], c=validPts[i];
+          const cp1x = p.x + (c.x-p.x)*0.4;
+          const cp2x = c.x - (c.x-p.x)*0.4;
+          pathD += ` C${cp1x.toFixed(1)},${p.y.toFixed(1)} ${cp2x.toFixed(1)},${c.y.toFixed(1)} ${c.x.toFixed(1)},${c.y.toFixed(1)}`;
         }
-        pathD = d;
       }
+
       const fillClose = ` L${validPts[validPts.length-1].x.toFixed(1)},${(pad.t+ch).toFixed(1)} L${validPts[0].x.toFixed(1)},${(pad.t+ch).toFixed(1)} Z`;
+
+      // Glow shadow
+      svg += `<path d="${pathD}" fill="none" stroke="${col}" stroke-width="4.5"
+        stroke-linecap="round" stroke-linejoin="round" opacity=".12"/>`;
+      // Fill
       svg += `<path d="${pathD}${fillClose}" fill="url(#${gid})"/>`;
-      svg += `<path d="${pathD}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+      // Line
+      svg += `<path d="${pathD}" fill="none" stroke="${col}" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round"/>`;
+
+      // Small dots on each data point
+      validPts.forEach((p, i) => {
+        const isLast = i === validPts.length - 1;
+        svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}"
+          r="${isLast ? 3.2 : 2}" fill="${isLast ? col : 'var(--bg2,#0d1117)'}"
+          stroke="${col}" stroke-width="${isLast ? 1.8 : 1.2}"
+          ${isLast ? `filter="url(#${gid}f)"` : 'opacity=".7"'}/>`;
+      });
     }
 
-    // Expected — rendu selon chartTypeExp
+    // Expected overlay line (dashed)
     if (hasExp) {
       const expType = ind.chartTypeExp || 'line';
-      if (expType === 'bar') {
-        // Barres transparentes avec bordure pointillée
-        const bw = Math.max(3, cw / last12.length * 0.65);
-        exps.forEach((v, i) => {
-          if (v === null || v === undefined) return;
-          const x = xOf(i) - bw/2;
-          const zero = yOf(Math.max(0, min));
-          const yy = yOf(v);
-          const bh = Math.abs(zero - yy);
-          const barY = v >= 0 ? yy : zero;
-          svg += `<rect x="${x.toFixed(1)}" y="${barY.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="none" stroke="#5a7090" stroke-width="1.2" stroke-dasharray="3,2" rx="1.5"/>`;
+      let ed = '';
+      exps.forEach((v,i) => {
+        if (v===null) return;
+        const x=xOf(i).toFixed(1), y=yOf(v).toFixed(1);
+        ed += ed ? ` L${x},${y}` : `M${x},${y}`;
+      });
+      if (ed) {
+        svg += `<path d="${ed}" fill="none" stroke="${colExp}"
+          stroke-width="1.3" stroke-dasharray="4,3" stroke-linecap="round" opacity=".8"/>`;
+        // Small exp dots
+        exps.forEach((v,i) => {
+          if (v===null) return;
+          svg += `<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(v).toFixed(1)}"
+            r="1.5" fill="${colExp}" opacity=".6"/>`;
         });
-      } else if (expType === 'stepped') {
-        let ed = '';
-        exps.forEach((v, i) => {
-          if (v === null) return;
-          const x = xOf(i).toFixed(1), y = yOf(v).toFixed(1);
-          if (!ed) ed = `M${x},${y}`;
-          else { const px = xOf(i).toFixed(1); ed += ` H${px} V${y}`; }
-        });
-        if (ed) svg += `<path d="${ed}" fill="none" stroke="#5a7090" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round"/>`;
-      } else {
-        // Ligne pointillée (défaut)
-        let ed = '';
-        exps.forEach((v, i) => {
-          if (v === null) return;
-          const x = xOf(i).toFixed(1), y = yOf(v).toFixed(1);
-          ed += ed ? ` L${x},${y}` : `M${x},${y}`;
-        });
-        if (ed) svg += `<path d="${ed}" fill="none" stroke="#5a7090" stroke-width="1.4" stroke-dasharray="4,3" stroke-linecap="round"/>`;
       }
     }
   }
 
-  // Last value dot
-  const lastV = vals.filter(v => v !== null && !isNaN(v)).pop();
-  if (lastV !== undefined) {
-    const lIdx = vals.lastIndexOf(lastV);
-    svg += `<circle cx="${xOf(lIdx).toFixed(1)}" cy="${yOf(lastV).toFixed(1)}" r="2.8" fill="${col}" stroke="var(--bg2)" stroke-width="1.5"/>`;
-  }
+  // ── Crosshair (hidden by default, shown on hover via JS) ──
+  svg += `<line id="${svgId}_cx" x1="0" y1="${pad.t}" x2="0" y2="${pad.t+ch}"
+    stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="3,2" display="none"/>`;
+  svg += `<circle id="${svgId}_dot" cx="0" cy="0" r="4"
+    fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5" display="none"/>`;
+
+  // ── Invisible hover strips (one per data point) ──
+  const stripW = last12.length > 1 ? cw / last12.length : cw;
+  last12.forEach((d,i) => {
+    const cx = xOf(i);
+    const sx = Math.max(pad.l, cx - stripW/2);
+    svg += `<rect class="hvr" x="${sx.toFixed(1)}" y="${pad.t}"
+      width="${stripW.toFixed(1)}" height="${ch}" fill="transparent"
+      data-i="${i}" pointer-events="all"/>`;
+  });
 
   svg += `</svg>`;
   return svg;
@@ -1807,7 +2112,7 @@ function switchTab(tab) {
 
 // ── FORM ──
 function clearForm() {
-  ['inp-currency','inp-name','inp-category','inp-frequency','inp-interval','inp-pubday','inp-unit','inp-reflevel','inp-charttype','inp-charttypeexp'].forEach(id => {
+  ['inp-currency','inp-name','inp-category','inp-frequency','inp-unit','inp-reflevel','inp-charttype','inp-charttypeexp'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
@@ -1823,8 +2128,6 @@ function fillForm(ind) {
   set('inp-name', ind.name);
   set('inp-category', ind.category);
   set('inp-frequency', ind.frequency || 'monthly');
-  set('inp-interval', ind.intervalDays || '');
-  set('inp-pubday', ind.pubDay ?? '');
   set('inp-unit', ind.unit || '');
   set('inp-reflevel', ind.refLevel ?? '');
   set('inp-charttype', ind.chartType || 'line');
@@ -1854,13 +2157,17 @@ function saveParams() {
   const sources = [...document.querySelectorAll('#sources-list .source-row input')]
     .map(i => i.value.trim()).filter(Boolean);
 
+  // Auto-derive intervalDays from frequency (for calendar fallback)
+  const freqIntervalMap = { monthly: 30, quarterly: 90, weekly: 7 };
+  const frequency = document.getElementById('inp-frequency').value;
+
   const params = {
     currency,
     name,
     category: document.getElementById('inp-category').value,
-    frequency: document.getElementById('inp-frequency').value,
-    intervalDays: parseInt(document.getElementById('inp-interval').value) || null,
-    pubDay: document.getElementById('inp-pubday').value !== '' ? parseInt(document.getElementById('inp-pubday').value) : null,
+    frequency,
+    intervalDays: freqIntervalMap[frequency] || 30,
+    pubDay: null,
     unit: document.getElementById('inp-unit').value.trim(),
     refLevel: document.getElementById('inp-reflevel').value !== '' ? parseFloat(document.getElementById('inp-reflevel').value) : null,
     chartType: document.getElementById('inp-charttype').value,
@@ -1885,24 +2192,157 @@ function saveParams() {
 
 // ── DATA ROWS ──
 function clearDataRows() {
-  document.getElementById('data-rows').innerHTML = '';
+  const tbody = document.getElementById('data-rows-body');
+  if (tbody) tbody.innerHTML = '';
 }
 
-// ── Load existing data into the textarea when opening the DATA tab ──
+// ══════════════════════════════════════════════════════════════════
+//  PAGE SWITCH (Dashboard / Calendrier)
+// ══════════════════════════════════════════════════════════════════
+function switchPage(page) {
+  const mainContent = document.getElementById('main-content');
+  const calPage     = document.getElementById('cal-page');
+  const navDash     = document.getElementById('nav-dashboard');
+  const navCal      = document.getElementById('nav-calendar');
+  const headerFilt  = document.querySelectorAll('.header-filters');
+
+  if (page === 'calendar') {
+    mainContent.style.display = 'none';
+    calPage.classList.add('visible');
+    navDash.classList.remove('active');
+    navCal.classList.add('active');
+    headerFilt.forEach(f => f.style.visibility = 'hidden');
+    buildCalendar();
+  } else {
+    mainContent.style.display = '';
+    calPage.classList.remove('visible');
+    navDash.classList.add('active');
+    navCal.classList.remove('active');
+    headerFilt.forEach(f => f.style.visibility = '');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  DATA INPUT MODE SWITCH (Tableau / Coller)
+// ══════════════════════════════════════════════════════════════════
+let _dataMode = 'table';
+
+function switchDataMode(mode) {
+  _dataMode = mode;
+  document.getElementById('mode-table').style.display = mode === 'table' ? '' : 'none';
+  document.getElementById('mode-paste').style.display = mode === 'paste' ? '' : 'none';
+  document.getElementById('mode-btn-table').classList.toggle('active', mode === 'table');
+  document.getElementById('mode-btn-paste').classList.toggle('active', mode === 'paste');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  STRUCTURED TABLE INPUT
+// ══════════════════════════════════════════════════════════════════
+function loadIndData() {
+  const ind = currentId ? DATA.indicators.find(i => i.id === currentId) : null;
+  if (!ind?.data.length) return;
+  // Load into table mode
+  switchDataMode('table');
+  const tbody = document.getElementById('data-rows-body');
+  tbody.innerHTML = '';
+  [...ind.data].reverse().forEach(r => {
+    addDataRow(r.label, r.value, r.expected ?? '');
+  });
+}
+
+function addDataRow(label='', value='', expected='') {
+  const tbody = document.getElementById('data-rows-body');
+  const idx = tbody.children.length + 1;
+  const tr = document.createElement('tr');
+  tr.dataset.idx = idx;
+
+  // Compute surprise badge if both values provided
+  const surpHtml = (value !== '' && expected !== '')
+    ? getSurpBadge(parseFloat(String(value).replace(/[%K]/g,'')), parseFloat(String(expected).replace(/[%K]/g,'')))
+    : '<span style="color:var(--muted);">—</span>';
+
+  tr.innerHTML = `
+    <td style="color:var(--muted);font-size:8px;text-align:center;width:24px;">${idx}</td>
+    <td><input class="dinput date-inp" value="${label}" placeholder="Mar 26" onchange="refreshSurp(this)" /></td>
+    <td><input class="dinput val-inp" value="${value}" placeholder="2.4%" onchange="refreshSurp(this)" style="color:var(--pos);" /></td>
+    <td><input class="dinput exp-inp" value="${expected}" placeholder="2.3%" onchange="refreshSurp(this)" /></td>
+    <td style="text-align:center;"><span class="surp-cell">${surpHtml}</span></td>
+    <td><button class="drow-del" onclick="this.closest('tr').remove();reindexRows();">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function reindexRows() {
+  document.querySelectorAll('#data-rows-body tr').forEach((tr, i) => {
+    tr.cells[0].textContent = i + 1;
+  });
+}
+
+function refreshSurp(input) {
+  const tr = input.closest('tr');
+  const val = parseFloat(tr.cells[2].querySelector('input').value.replace(/[%K]/g,''));
+  const exp = parseFloat(tr.cells[3].querySelector('input').value.replace(/[%K]/g,''));
+  tr.cells[4].querySelector('.surp-cell').innerHTML =
+    (!isNaN(val) && !isNaN(exp)) ? getSurpBadge(val, exp) : '<span style="color:var(--muted);">—</span>';
+}
+
+function getSurpBadge(val, exp) {
+  if (isNaN(val) || isNaN(exp)) return '<span style="color:var(--muted);">—</span>';
+  const diff = val - exp;
+  const pct  = exp !== 0 ? ((diff / Math.abs(exp)) * 100).toFixed(1) : '—';
+  const cls  = diff > 0 ? 'pos' : 'neg';
+  const arrow = diff > 0 ? '▲' : '▼';
+  return `<span class="drow-surp ${cls}">${arrow} ${pct}%</span>`;
+}
+
+function getTableRows() {
+  const rows = [];
+  document.querySelectorAll('#data-rows-body tr').forEach(tr => {
+    const label = tr.cells[1].querySelector('input').value.trim();
+    const rawV  = tr.cells[2].querySelector('input').value.trim();
+    const rawE  = tr.cells[3].querySelector('input').value.trim();
+    const value    = parseNumericValue(rawV);
+    const expected = rawE ? parseNumericValue(rawE) : null;
+    const period   = parseDateToLabel(label);
+    if (period && value !== null) {
+      rows.push({ label: period, value, ...(expected !== null ? { expected } : {}) });
+    }
+  });
+  return rows;
+}
+
+// ── Load existing data into the table input when opening the DATA tab ──
 function renderDataRows() {
   if (!currentId) return;
   const ind = DATA.indicators.find(i => i.id === currentId);
   if (!ind) return;
 
-  // Populate textarea with existing data as text block
+  // Reset to table mode
+  switchDataMode('table');
+  _dataMode = 'table';
+
+  // Populate next date field
+  const nextInp = document.getElementById('inp-next-date');
+  if (nextInp) nextInp.value = ind.nextDate || '';
+
+  // Populate structured table
+  const tbody = document.getElementById('data-rows-body');
+  if (tbody) {
+    tbody.innerHTML = '';
+    const sorted = [...(ind.data || [])].reverse(); // newest first
+    sorted.forEach(r => {
+      addDataRow(r.label || '', r.value !== undefined ? r.value : '', r.expected !== undefined && r.expected !== null ? r.expected : '');
+    });
+    if (!sorted.length) addDataRow(); // blank row to start
+  }
+
+  // Also pre-fill textarea for paste mode
   const ta = document.getElementById('data-textarea');
-  if (!ta) return;
-  if (ind.data.length) {
+  if (ta && ind.data?.length) {
     ta.value = ind.data.map(r => {
       const exp = (r.expected !== null && r.expected !== undefined) ? `\t${r.expected}` : '';
       return `${r.label || ''}\t${r.value !== null ? r.value : ''}${exp}`;
     }).join('\n');
-  } else {
+  } else if (ta) {
     ta.value = '';
   }
 
@@ -1914,12 +2354,233 @@ function renderDataRows() {
   } else {
     srcBar.style.display = 'none';
   }
+}
 
-  previewDataText();
+// ══════════════════════════════════════════════════════════════════
+//  FOREX FACTORY / INVESTING.COM FORMAT PARSER
+// ══════════════════════════════════════════════════════════════════
+
+const MON_FR_FULL = {
+  janvier:0,février:1,fevrier:1,mars:2,avril:3,mai:4,juin:5,
+  juillet:6,août:7,aout:7,septembre:8,octobre:9,novembre:10,décembre:11,decembre:11,
+  'janv':0,'janv.':0,'févr':1,'févr.':1,'fevr':1,'fevr.':1,
+  'avr':3,'avr.':3,'juil':6,'juil.':6,'sept':8,'sept.':8,
+  'oct':9,'oct.':9,'nov':10,'nov.':10,'déc':11,'déc.':11,'dec':11,'dec.':11
+};
+
+function parseFRFullDate(raw) {
+  if (!raw) return null;
+  raw = raw.trim().replace(/,.*$/, '').trim();
+  const m = raw.match(/^(\d{1,2})\s+([A-Za-zÀ-ÿ]+\.?)\s+(\d{4})$/);
+  if (!m) return null;
+  const day = parseInt(m[1]);
+  const moRaw = m[2].toLowerCase();
+  let mo = MON_FR_FULL[moRaw];
+  if (mo === undefined) {
+    // prefix match: "avr" → "avril"
+    for (const [k, v] of Object.entries(MON_FR_FULL)) {
+      const kc = k.replace(/\.$/, '');
+      if (moRaw.startsWith(kc) || kc.startsWith(moRaw)) { mo = v; break; }
+    }
+  }
+  if (mo === undefined) return null;
+  return new Date(parseInt(m[3]), mo, day);
+}
+
+function dateToISO(d) {
+  if (!d || isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function dateToLabel(d) {
+  if (!d || isNaN(d.getTime())) return null;
+  const LABEL = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  return `${LABEL[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
+}
+
+function isFFFormat(text) {
+  return /à venir|a venir|réel.*prévisions|reel.*previsions|impact.*date.*attendu/i.test(text)
+    && !/date de sortie/i.test(text); // exclude Investing.com
+}
+
+function isInvestingFormat(text) {
+  return /date de sortie/i.test(text) && /temps/i.test(text);
+}
+
+// ── Investing.com parser ──
+// Table: "Date de sortie | Temps | Réel | Prévisions | Précédent"
+// Quirk: "Précédent" value appears on its OWN line after each data row
+function parseInvestingFormat(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let nextDate  = null;
+  const rows    = [];
+  let inTable   = false;
+  let pendingRow = null;
+
+  // ── Lone numeric value detector (Précédent orphan line) ──
+  // Matches: "3.4%", "-0.5%", "2.8", "123.4K", "1,234.5"
+  const LONE_NUM = /^-?[\d][\d,.']*\.?\d*[KkMmBbT]?%?$/;
+  const isLoneNum = line => LONE_NUM.test(line) && !line.includes('\t');
+
+  // Helper: flush pending row
+  const flush = () => { if (pendingRow) { rows.push(pendingRow); pendingRow = null; } };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // ── Table header detection ──
+    if (/date de sortie/i.test(line)) {
+      inTable = true;
+      continue;
+    }
+
+    if (!inTable) continue;
+
+    // ── Stop conditions ──
+    if (/^(actualités|afficher plus|show more|commentaires|analyses|discussion)/i.test(line)) {
+      flush(); break;
+    }
+
+    // ── Lone number = Précédent orphan → flush pending and skip ──
+    if (isLoneNum(line)) {
+      flush();
+      continue;
+    }
+
+    flush(); // flush any previous pending before parsing new row
+
+    // ── Parse data row ──
+    // Could be tab-separated OR space-separated (depending on browser copy)
+    let cols;
+    if (line.includes('\t')) {
+      cols = line.split('\t').map(c => c.trim());
+    } else {
+      // Space-separated fallback: split on 2+ spaces
+      cols = line.split(/\s{2,}/).map(c => c.trim()).filter(Boolean);
+    }
+
+    if (cols.length < 1) continue;
+
+    // Col 0 = "DD mois YYYY (période)" — strip period annotation
+    const rawDate = cols[0].replace(/\s*\([^)]*\)/, '').trim();
+    const d = parseFRFullDate(rawDate);
+    if (!d) continue;
+
+    // Find Réel and Prévisions — they're after the time column
+    // Tab format: [date, time, réel, prévisions, précédent]
+    // Space format: [date(période), time, réel, prévisions] or fewer
+    const rawReal = cols[2] || '';
+    const rawExp  = cols[3] || '';
+    const value    = parseNumericValue(rawReal);
+    const expected = parseNumericValue(rawExp);
+
+    // Empty Réel + no nextDate yet → this is the upcoming release row
+    if (value === null && !nextDate) {
+      nextDate = dateToISO(d);
+      continue;
+    }
+
+    if (value === null) continue; // skip other rows with no real value
+
+    pendingRow = {
+      label: dateToLabel(d),
+      value,
+      ...(expected !== null ? { expected } : {})
+    };
+  }
+  flush();
+
+  return { nextDate, rows };
+}
+
+function parseFFFormat(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let nextDate = null;
+  const rows = [];
+  let inHistory = false;
+  let awaitNextDate = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // "À venir" on its own line → next line has the date
+    if (/^[àa]\s*venir$/i.test(line)) { awaitNextDate = true; continue; }
+    if (awaitNextDate) {
+      const d = parseFRFullDate(line);
+      if (d) nextDate = dateToISO(d);
+      awaitNextDate = false;
+      continue;
+    }
+    // "À venir : 30 avr. 2026, 12:30" on same line
+    const avenir = line.match(/[àa]\s*venir[:\s]+(.+)/i);
+    if (avenir) {
+      const d = parseFRFullDate(avenir[1]);
+      if (d) nextDate = dateToISO(d);
+      continue;
+    }
+
+    // History table header detection
+    if (/réel|reel/i.test(line) && /prévisions|previsions|forecast/i.test(line)) {
+      inHistory = true; continue;
+    }
+    if (!inHistory) continue;
+
+    // Stop at news section
+    if (/^(plus$|actualités|sorti le|from |de [a-z])/i.test(line)) { inHistory = false; continue; }
+
+    // Parse history row — strip leading icons/spaces/bullets
+    const clean = line.replace(/^[\s•·\-▲▼🔴🟡🟢⚪]+/, '').trim();
+
+    // Tab-separated: "20 février 2026\t1.4%\t2.8%\t4.4%"
+    const cols = clean.split(/\t/).map(p => p.trim()).filter(Boolean);
+    if (cols.length >= 2) {
+      const rawDate = cols[0].replace(/^[^\dà-ÿ]+/, '').trim();
+      const d = parseFRFullDate(rawDate);
+      const value    = parseNumericValue(cols[1]);
+      const expected = cols[2] ? parseNumericValue(cols[2]) : null;
+      if (d && value !== null) {
+        rows.push({ label: dateToLabel(d), value, ...(expected !== null ? { expected } : {}) });
+        continue;
+      }
+    }
+
+    // Multi-space separated: "20 février 2026  1.4%  2.8%  4.4%"
+    const sp = clean.split(/\s{2,}/).map(p => p.trim()).filter(Boolean);
+    if (sp.length >= 2) {
+      const d = parseFRFullDate(sp[0].replace(/^[^\d]+/, '').trim());
+      const value    = parseNumericValue(sp[1]);
+      const expected = sp[2] ? parseNumericValue(sp[2]) : null;
+      if (d && value !== null) {
+        rows.push({ label: dateToLabel(d), value, ...(expected !== null ? { expected } : {}) });
+      }
+    }
+  }
+
+  return { nextDate, rows };
 }
 
 // ── Parse the textarea text into rows (supports both formats) ──
 function parseDataText(raw) {
+  // ── Investing.com format ──
+  if (isInvestingFormat(raw)) {
+    const result = parseInvestingFormat(raw);
+    if (result.nextDate) {
+      const inp = document.getElementById('inp-next-date');
+      if (inp) inp.value = result.nextDate;
+    }
+    return result.rows;
+  }
+
+  // ── Forex Factory format ──
+  if (isFFFormat(raw)) {
+    const result = parseFFFormat(raw);
+    if (result.nextDate) {
+      const inp = document.getElementById('inp-next-date');
+      if (inp) inp.value = result.nextDate;
+    }
+    return result.rows;
+  }
+
   const rows = [];
   const lines = raw.split('\n');
   let inTableBlock = false;
@@ -1931,26 +2592,20 @@ function parseDataText(raw) {
     // Table header row → enter table mode
     if (isTableHeader(trimmed)) { inTableBlock = true; return; }
 
-    // ── Auto-detect headerless table: line starts with a full date (Mon DD, YYYY) ──
-    // Format: "Apr 10, 2026\t3.3%\t3.4%\t2.4%"
-    // cols: [date, actual, forecast, previous]  → we use actual + forecast only
+    // Auto-detect headerless table
     if (isTableDataRow(trimmed)) {
       const cols = trimmed.split(/\t/).map(c => c.trim());
       const period   = parseDateToLabel(cols[0]);
       const value    = parseNumericValue(cols[1]);
       const expected = parseNumericValue(cols[2]);
-      // cols[3] = previous → ignored
       if (period && value !== null) rows.push({ label: period, value, ...(expected !== null ? { expected } : {}) });
       return;
     }
 
-    // Not a table data row — exit table mode and try inline
     inTableBlock = false;
 
-    // Inline: "Mar 26  2.4%  2.3%"  or tab-separated  "Mar 26\t2.4%\t2.3%"
     const parts = trimmed.split(/\t+|\s{2,}/).map(p => p.trim()).filter(Boolean);
     if (parts.length < 2) {
-      // single-space separated: "Mar 26 2.4% 2.3%"
       const sp = trimmed.split(/\s+/);
       if (sp.length >= 3 && /^\d{2,4}$/.test(sp[1])) {
         const period = parseDateToLabel(sp[0] + ' ' + sp[1]);
@@ -1961,7 +2616,6 @@ function parseDataText(raw) {
       return;
     }
 
-    // First part is label, second is value, third optional expected
     const period = parseDateToLabel(parts[0]);
     const value  = parseNumericValue(parts[1]);
     const expected = parseNumericValue(parts[2]);
@@ -1973,26 +2627,51 @@ function parseDataText(raw) {
 
 // ── Live preview in the right panel ──
 function previewDataText() {
-  const ta = document.getElementById('data-textarea');
+  const ta   = document.getElementById('data-textarea');
   const list = document.getElementById('data-preview-list');
   const counter = document.getElementById('data-preview-count');
   if (!ta || !list) return;
 
-  const rows = parseDataText(ta.value);
-  counter.textContent = rows.length ? `${rows.length} entrée(s)` : '—';
+  const isFF       = isFFFormat(ta.value);
+  const isInvesting = isInvestingFormat(ta.value);
+  const rows = parseDataText(ta.value); // auto-fills inp-next-date
 
-  if (!rows.length) {
-    list.innerHTML = '<div style="color:var(--muted);padding:16px 0;text-align:center;font-size:8px;line-height:1.8;">Collez des données<br>pour voir l\'aperçu</div>';
-    return;
-  }
+  counter.textContent = rows.length ? `${rows.length} entrée(s)` : '—';
 
   const ind = currentId ? DATA.indicators.find(i => i.id === currentId) : null;
   const cat = ind ? getCat(ind.category) : CATS.autres;
 
-  list.innerHTML = rows.map(r => {
+  const nextVal = document.getElementById('inp-next-date')?.value;
+  const dateIcon = nextVal
+    ? `<span style="margin-left:auto;color:var(--pos);">📅 DATE ✓</span>`
+    : `<span style="margin-left:auto;color:var(--amber);">📅 DATE —</span>`;
+
+  let sourceBadge = '';
+  if (isInvesting) {
+    sourceBadge = `<div style="display:flex;align-items:center;gap:5px;padding:4px 6px;margin-bottom:6px;
+      background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.3);
+      font-size:7px;font-family:var(--font-mono);font-weight:700;color:#ff8c00;letter-spacing:.08em;">
+      📊 FORMAT INVESTING.COM ${dateIcon}</div>`;
+  } else if (isFF) {
+    sourceBadge = `<div style="display:flex;align-items:center;gap:5px;padding:4px 6px;margin-bottom:6px;
+      background:rgba(100,160,255,.1);border:1px solid rgba(100,160,255,.3);
+      font-size:7px;font-family:var(--font-mono);font-weight:700;color:#64a0ff;letter-spacing:.08em;">
+      📋 FORMAT FOREX FACTORY ${dateIcon}</div>`;
+  }
+
+  if (!rows.length) {
+    const hint = isInvesting ? 'Investing détecté — données non trouvées'
+               : isFF       ? 'FF détecté — données non trouvées'
+               : 'Collez des données pour voir l\'aperçu';
+    list.innerHTML = sourceBadge + `<div style="color:var(--muted);padding:10px 0;text-align:center;font-size:8px;line-height:1.8;">${hint}</div>`;
+    return;
+  }
+
+  list.innerHTML = sourceBadge + rows.map(r => {
     const exists = ind?.data.find(d => d.label === r.label);
     const icon = exists ? '<span style="color:var(--amber)">⚠</span>' : '<span style="color:var(--pos)">＋</span>';
-    const expHtml = r.expected !== undefined ? `<span style="color:var(--muted);font-size:8px;"> / ${r.expected}</span>` : '';
+    const expHtml = r.expected !== undefined
+      ? `<span style="color:var(--muted);font-size:8px;"> / ${r.expected}</span>` : '';
     return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(26,32,48,.5);">
       ${icon}
       <span style="color:var(--muted);width:44px;flex-shrink:0;font-size:8px;">${r.label}</span>
@@ -2002,17 +2681,8 @@ function previewDataText() {
   }).join('');
 }
 
-// ── Export current data into textarea ──
 function loadIndTemplate() {
-  const ind = currentId ? DATA.indicators.find(i => i.id === currentId) : null;
-  if (!ind?.data.length) return;
-  const ta = document.getElementById('data-textarea');
-  ta.value = ind.data.map(r => {
-    const exp = (r.expected !== null && r.expected !== undefined) ? `\t${r.expected}` : '';
-    return `${r.label}\t${r.value}${exp}`;
-  }).join('\n');
-  previewDataText();
-  ta.focus();
+  loadIndData();
 }
 
 // ── Sort indicator data oldest → newest ──
@@ -2044,12 +2714,22 @@ function saveData() {
   const ind = DATA.indicators.find(i => i.id === currentId);
   if (!ind) { closeModal(); return; }
 
-  const ta = document.getElementById('data-textarea');
-  if (!ta) { closeModal(); return; }
+  // Save next publication date
+  const nextInp = document.getElementById('inp-next-date');
+  if (nextInp) {
+    ind.nextDate = nextInp.value || null;
+  }
 
-  const rows = parseDataText(ta.value);
-  if (!rows.length && ta.value.trim()) {
-    if (!confirm('Aucune donnée reconnue. Sauvegarder quand même (vide) ?')) return;
+  let rows = [];
+  if (_dataMode === 'table') {
+    rows = getTableRows();
+  } else {
+    const ta = document.getElementById('data-textarea');
+    if (!ta) { closeModal(); return; }
+    rows = parseDataText(ta.value);
+    if (!rows.length && ta.value.trim()) {
+      if (!confirm('Aucune donnée reconnue. Sauvegarder quand même (vide) ?')) return;
+    }
   }
 
   ind.data = sortDataByDate(rows);
@@ -2088,25 +2768,17 @@ function moveInd(id, dir) {
 //  REMINDER
 // ══════════════════════════════════════════════════════════════════
 function needsUpdate(ind) {
-  if (!ind.intervalDays) return null;
+  // Now relies on calcNextDate (nextDate field or intervalDays fallback)
+  const next = calcNextDate(ind);
+  if (!next) return null;
   const today = new Date(); today.setHours(0,0,0,0);
-  const todayDay = today.getDay();
-  let lastDate = null;
-  if (ind.data?.length) {
-    const FR = {jan:0,fév:1,feb:1,mar:2,avr:3,apr:3,mai:4,may:4,jui:5,jun:5,jul:6,aoû:7,aug:7,sep:8,oct:9,nov:10,déc:11,dec:11};
-    const m = (ind.data[ind.data.length-1].label||'').trim().match(/^([A-Za-zÀ-ÿ]{2,4})\s+(\d{2,4})$/);
-    if (m) {
-      const mKey = m[1].toLowerCase().substring(0,3);
-      let yr = parseInt(m[2]); if (yr < 100) yr += 2000;
-      const mo = FR[mKey];
-      if (mo !== undefined) lastDate = new Date(yr, mo+1, 0);
-    }
-  }
-  const daysSince = lastDate ? Math.floor((today - lastDate) / 86400000) : 999;
-  const isLate = daysSince >= ind.intervalDays;
-  const isDueToday = ind.pubDay !== null && ind.pubDay !== undefined && todayDay === ind.pubDay;
-  if (!isLate && !isDueToday) return null;
-  return { daysSince, isDueToday };
+  const d = Math.round((next - today) / 86400000);
+  // Due today or overdue
+  if (d > 1) return null;
+  const daysSince = ind.data?.length
+    ? Math.floor((today - next) / 86400000) + (ind.intervalDays || 30)
+    : 999;
+  return { daysSince, isDueToday: d === 0 };
 }
 
 function checkAndShowReminder() {
@@ -2522,6 +3194,315 @@ function initApp() {
   document.getElementById('nav-date').textContent = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   // Load from Firebase (falls back to localStorage if offline)
   loadFromFirebase();
+}
+// ══════════════════════════════════════════════════════════════════
+//  CALENDAR ENGINE
+// ══════════════════════════════════════════════════════════════════
+const CAL_FILTERS = { cur: 'all', cat: 'all' };
+
+function calFilter(type, val, btn) {
+  CAL_FILTERS[type] = val;
+  document.querySelectorAll(`[data-cf="${type}"]`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildCalendar();
+}
+
+// Compute next expected release date:
+// Priority 1 → ind.nextDate (set manually in data modal)
+// Priority 2 → last data point + intervalDays (auto calculation)
+function calcNextDate(ind) {
+  // Priority 1: manual next date entered by user
+  if (ind.nextDate) {
+    const d = new Date(ind.nextDate);
+    if (!isNaN(d.getTime())) return d;
+  }
+
+  // Priority 2: auto-calculate from last data + intervalDays
+  if (!ind.intervalDays || !ind.data?.length) return null;
+
+  const MON = {jan:0,fév:1,feb:1,mar:2,avr:3,apr:3,mai:4,may:4,jui:5,jun:5,jul:6,aoû:7,aug:7,sep:8,oct:9,nov:10,déc:11,dec:11};
+  const last = ind.data[ind.data.length - 1];
+  const label = (last.label || '').trim();
+
+  let baseDate = null;
+
+  // "Mar 26" or "Mar 2026"
+  const m = label.match(/^([A-Za-zÀ-ÿ]{2,4})\s+(\d{2,4})$/);
+  if (m) {
+    const mk = m[1].toLowerCase().substring(0,3);
+    let yr = parseInt(m[2]); if (yr < 100) yr += 2000;
+    const mo = MON[mk];
+    if (mo !== undefined) baseDate = new Date(yr, mo + 1, 0); // last day of that month
+  }
+
+  // "Q1 26"
+  const q = label.match(/Q([1-4])\s*(\d{2,4})/i);
+  if (q) {
+    let yr = parseInt(q[2]); if (yr < 100) yr += 2000;
+    const endMo = parseInt(q[1]) * 3;
+    baseDate = new Date(yr, endMo, 0);
+  }
+
+  if (!baseDate) return null;
+  return new Date(baseDate.getTime() + ind.intervalDays * 86400000);
+}
+
+function diffDays(date) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((date - today) / 86400000);
+}
+
+function fmtDateFR(date) {
+  if (!date) return '—';
+  const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function buildCalendar() {
+  const body = document.getElementById('cal-body');
+  if (!body) return;
+
+  const curF = CAL_FILTERS.cur;
+  const catF = CAL_FILTERS.cat;
+
+  let inds = DATA.indicators.filter(ind => {
+    if (curF !== 'all' && ind.currency.toLowerCase() !== curF) return false;
+    if (catF !== 'all' && ind.category !== catF) return false;
+    return true;
+  });
+
+  document.getElementById('cal-count').textContent = `${inds.length} indicateur(s)`;
+
+  // Sort into 3 buckets by next date
+  const today = new Date(); today.setHours(0,0,0,0);
+  const in7 = new Date(today.getTime() + 7*86400000);
+  const in30 = new Date(today.getTime() + 30*86400000);
+
+  const buckets = {
+    overdue:  { label: '🔴 EN RETARD / À METTRE À JOUR', color: 'var(--neg)',   items: [] },
+    week:     { label: '🟡 CETTE SEMAINE (7 prochains jours)', color: 'var(--amber)', items: [] },
+    month:    { label: '🟢 CE MOIS (8–30 jours)',         color: 'var(--pos)',   items: [] },
+    later:    { label: '⚪ PLUS TARD (> 30 jours)',        color: 'var(--muted)', items: [] },
+    nodate:   { label: '⚫ SANS DATE CALCULÉE',            color: 'var(--muted)', items: [] },
+  };
+
+  inds.forEach(ind => {
+    const next = calcNextDate(ind);
+    if (!next) { buckets.nodate.items.push({ ind, next: null }); return; }
+    const d = diffDays(next);
+    if (d < 0)        buckets.overdue.items.push({ ind, next });
+    else if (next <= in7)  buckets.week.items.push({ ind, next });
+    else if (next <= in30) buckets.month.items.push({ ind, next });
+    else                   buckets.later.items.push({ ind, next });
+  });
+
+  // Sort each bucket by next date asc
+  Object.values(buckets).forEach(b => {
+    b.items.sort((a, b) => {
+      if (!a.next && !b.next) return 0;
+      if (!a.next) return 1;
+      if (!b.next) return -1;
+      return a.next - b.next;
+    });
+  });
+
+  const freqMap = { monthly:'MENS', quarterly:'TRIM', weekly:'HEBD' };
+
+  body.innerHTML = '';
+
+  Object.entries(buckets).forEach(([key, bucket]) => {
+    if (!bucket.items.length) return;
+
+    const sec = document.createElement('div');
+    sec.className = 'cal-section';
+    sec.innerHTML = `
+      <div class="cal-section-header">
+        <span class="cal-sec-dot" style="background:${bucket.color};"></span>
+        ${bucket.label}
+        <span style="margin-left:auto;font-size:8px;color:var(--muted);">${bucket.items.length} ind.</span>
+      </div>`;
+
+    const table = document.createElement('table');
+    table.className = 'cal-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th style="width:36px;"></th>
+          <th>INDICATEUR</th>
+          <th>CAT.</th>
+          <th class="right">DERNIER RÉEL</th>
+          <th class="right">ATTENDU</th>
+          <th class="right">PRÉCÉDENT</th>
+          <th>SURPRISE</th>
+          <th>PROCHAINE DATE</th>
+          <th>FRÉQ.</th>
+        </tr>
+      </thead>
+      <tbody id="cal-tbody-${key}"></tbody>`;
+
+    const tbody = table.querySelector('tbody');
+
+    bucket.items.forEach(({ ind, next }) => {
+      const cat = getCat(ind.category);
+      const last = ind.data?.length ? ind.data[ind.data.length - 1] : null;
+      const prev = ind.data?.length > 1 ? ind.data[ind.data.length - 2] : null;
+      const unit = ind.unit || '';
+
+      const latestV = last?.value;
+      const expV    = last?.expected;
+      const prevV   = prev?.value;
+      const surp    = (latestV !== undefined && expV !== undefined && expV !== null) ? latestV - expV : null;
+
+      // Next date styling
+      let nextHtml = '—';
+      let daysBadge = '';
+      if (next) {
+        const d = diffDays(next);
+        const isManual = !!ind.nextDate;
+        let cls = d < 0 ? 'overdue' : d <= 7 ? 'soon' : 'future';
+        let label = d < 0 ? `${Math.abs(d)}j de retard` : d === 0 ? 'AUJOURD\'HUI' : `dans ${d}j`;
+        const pin = isManual ? '<span title="Date saisie manuellement" style="font-size:9px;margin-right:3px;">📌</span>' : '<span title="Date calculée" style="font-size:9px;margin-right:3px;opacity:.4;">⟳</span>';
+        nextHtml = `<div class="cal-next-date ${cls}">${pin}${fmtDateFR(next)}</div>`;
+        daysBadge = `<div class="cal-days-badge ${cls}">${label}</div>`;
+      }
+
+      // Surprise badge
+      let surprHtml = '—';
+      if (surp !== null) {
+        const cls = surp > 0 ? 'pos' : 'neg';
+        const arrow = surp > 0 ? '▲' : '▼';
+        surprHtml = `<span class="cal-surprise ${cls}">${arrow} ${fmtVal(Math.abs(surp), unit)}</span>`;
+      }
+
+      // Real value color
+      let valCls = 'neutral';
+      if (surp !== null) valCls = surp > 0 ? 'pos' : 'neg';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <span class="cal-flag">${getCurFlag(ind.currency)}</span>
+        </td>
+        <td>
+          <div class="cal-name">${ind.name}</div>
+          <div class="cal-sub">${ind.currency} · ${last?.label || '—'}</div>
+        </td>
+        <td>
+          <span class="cal-cat" style="background:${cat.hex}18;color:${cat.hex};border-color:${cat.hex}38;">${cat.emoji} ${cat.label}</span>
+        </td>
+        <td style="text-align:right;">
+          ${latestV !== undefined
+            ? `<span class="cal-val ${valCls}">${fmtVal(latestV, unit)}</span>`
+            : '<span style="color:var(--muted);">—</span>'}
+        </td>
+        <td style="text-align:right;">
+          <span class="cal-exp">${expV !== undefined && expV !== null ? fmtVal(expV, unit) : '—'}</span>
+        </td>
+        <td style="text-align:right;">
+          <span class="cal-prev">${prevV !== undefined ? fmtVal(prevV, unit) : '—'}</span>
+        </td>
+        <td>${surprHtml}</td>
+        <td>
+          ${nextHtml}
+          ${daysBadge}
+        </td>
+        <td><span class="cal-freq">${freqMap[ind.frequency] || ind.frequency?.toUpperCase() || '—'}</span></td>`;
+      tbody.appendChild(tr);
+    });
+
+    sec.appendChild(table);
+    body.appendChild(sec);
+  });
+
+  if (!body.children.length) {
+    body.innerHTML = '<div class="cal-no-data">AUCUN INDICATEUR TROUVÉ AVEC CES FILTRES</div>';
+  }
+}
+
+</script>
+<!-- ── Chart hover tooltip ── -->
+<div id="chart-tip" style="
+  position:fixed;pointer-events:none;z-index:9999;
+  background:rgba(13,17,23,.96);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:2px;
+  padding:7px 11px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  min-width:110px;
+  display:none;
+  box-shadow:0 4px 24px rgba(0,0,0,.6);
+  backdrop-filter:blur(6px);
+"></div>
+
+<script>
+// ── Chart hover handlers ──
+let _tipVisible = false;
+
+function svgHover(e, svg) {
+  const tip = document.getElementById('chart-tip');
+  const pts = JSON.parse(svg.dataset.pts || '[]');
+  const unit = svg.dataset.unit || '';
+  const col  = svg.dataset.col || '#fff';
+  if (!pts.length) return;
+
+  // Find SVG bounding rect and mouse X relative to SVG viewBox
+  const rect = svg.getBoundingClientRect();
+  const scaleX = parseFloat(svg.getAttribute('viewBox').split(' ')[2]) / rect.width;
+  const mouseX = (e.clientX - rect.left) * scaleX;
+
+  // Find closest point
+  let best = pts[0], bestDist = Infinity;
+  pts.forEach(p => {
+    const d = Math.abs(p.x - mouseX);
+    if (d < bestDist) { bestDist = d; best = p; }
+  });
+
+  // Show/update crosshair elements in SVG
+  const svgId = svg.id;
+  const cx = document.getElementById(svgId + '_cx');
+  const dot = document.getElementById(svgId + '_dot');
+  if (cx) { cx.setAttribute('x1', best.x); cx.setAttribute('x2', best.x); cx.removeAttribute('display'); }
+
+  // Build tooltip content
+  const surp = (best.value !== null && best.expected !== null)
+    ? best.value - best.expected : null;
+  const surpHtml = surp !== null
+    ? `<div style="margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07);">
+        <span style="color:${surp>0?'#2ecc8a':'#ff4069'};font-weight:700;">
+          ${surp>0?'▲':'▼'} ${Math.abs(surp).toFixed(2)}${unit}
+        </span>
+        <span style="color:#3d5470;font-size:8px;"> SURPRISE</span>
+      </div>` : '';
+
+  const expHtml = best.expected !== null
+    ? `<div style="color:#5a7090;margin-top:2px;">
+        <span style="color:#3d5470;">ATT</span> ${best.expected}${unit}
+      </div>` : '';
+
+  tip.innerHTML = `
+    <div style="color:#3d5470;font-size:8px;letter-spacing:.1em;margin-bottom:4px;">${best.label}</div>
+    <div style="font-size:13px;font-weight:700;color:${col};">${best.value}${unit}</div>
+    ${expHtml}
+    ${surpHtml}`;
+
+  // Position tooltip (avoid screen edges)
+  const tw = 150, th = 90;
+  let tx = e.clientX + 14, ty = e.clientY - 20;
+  if (tx + tw > window.innerWidth)  tx = e.clientX - tw - 10;
+  if (ty + th > window.innerHeight) ty = e.clientY - th - 10;
+  tip.style.left  = tx + 'px';
+  tip.style.top   = ty + 'px';
+  tip.style.display = 'block';
+  _tipVisible = true;
+}
+
+function svgHideTooltip() {
+  document.getElementById('chart-tip').style.display = 'none';
+  _tipVisible = false;
+  // Hide all crosshairs
+  document.querySelectorAll('[id$="_cx"],[id$="_dot"]').forEach(el => el.setAttribute('display','none'));
 }
 </script>
 </body>
